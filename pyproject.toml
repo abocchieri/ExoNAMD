@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "exonamd"
+version = "0.0.1"
+authors = [
+    {name = "Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"},
+    {name = "Jiri Zak"},
+]
+description = "ExoNAMD is a Python codebase to compute the Normalized Angular Momentum Deficit of planets and exoplanets"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+]
+requires-python = ">3.8"
+dependencies = [
+    "numpy>=1.22.2",
+    "matplotlib>=3.5.1",
+    "spright",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/abocchieri/ExoNAMD"
+"Bug Tracker" = "https://github.com/abocchieri/ExoNAMD/issues"
+"Source Code" = "https://github.com/abocchieri/ExoNAMD"
+
+[project.optional-dependencies]
+docs = [
+]
+test = [
+]
+
+[project.scripts]
+
+[tool.setuptools]
+zip-safe = true
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages]
+find = {namespaces = false}
