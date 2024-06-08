@@ -42,7 +42,7 @@ def compute_namd(userid: str, df: pd.DataFrame, Npt: int, do_plot: bool = True, 
 
         pl_df_mcmc_samples[f"good_idx_{pl_name}"] = (
             (pl_df_mcmc_samples[f"pl_orbeccen_{pl_name}"] >= 0) & (pl_df_mcmc_samples[f"pl_orbeccen_{pl_name}"] <= 1) &
-            (pl_df_mcmc_samples[f"pl_relincl_{pl_name}"] >= 0) & (pl_df_mcmc_samples[f"pl_relincl_{pl_name}"] <= 180) &
+            (np.abs(pl_df_mcmc_samples[f"pl_relincl_{pl_name}"]) >= 0) & (np.abs(pl_df_mcmc_samples[f"pl_relincl_{pl_name}"]) <= 180) &
             (pl_df_mcmc_samples[f"pl_orbsmax_{pl_name}"] >= 0) &
             (pl_df_mcmc_samples[f"pl_bmasse_{pl_name}"] >= 0)
             )
