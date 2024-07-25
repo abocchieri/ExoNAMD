@@ -37,7 +37,7 @@ def compute_namd(userid: str, df: pd.DataFrame, Npt: int, do_plot: bool = True, 
 
         pl_df_mcmc_samples[f"pl_relincl_{pl_name}"] = np.random.normal(
             loc=pl_df["pl_relincl"],
-            scale=0.5 * (pl_df["pl_orbinclerr1"]-pl_df["pl_orbinclerr2"]),
+            scale=0.5 * (pl_df["pl_relinclerr1"]-pl_df["pl_relinclerr2"]),
             size=Npt)
 
         pl_df_mcmc_samples[f"good_idx_{pl_name}"] = (
