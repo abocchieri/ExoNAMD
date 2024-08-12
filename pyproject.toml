@@ -34,7 +34,6 @@ dependencies = [
     "pandas",
     "numpy",
     "matplotlib",
-    "gen_tso",
 ]
 
 [project.readme]
