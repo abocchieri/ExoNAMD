@@ -418,8 +418,8 @@ def update_host(row, aliases, verbose=False):
     host = row['hostname']
     for key in aliases.keys():
         if host in aliases[key]['host_aliases']:
-            if verbose and host != key:
-                print(f"Found {host} in aliases, updating to {key}")
+            if host != key:
+                if verbose: print(f"Found {host} in aliases, updating to {key}")
             return key
     return host
 
@@ -428,7 +428,11 @@ def update_planet(row, aliases, verbose=False):
     planet = row['pl_name']
     for key in aliases.keys():
         if planet in aliases[key]['planet_aliases'].keys():
-            if verbose and planet != aliases[key]['planet_aliases'][planet]:
-                print(f"Found {planet} in aliases, updating to {aliases[key]['planet_aliases'][planet]}")
-            return aliases[key]['planet_aliases'][planet]
+            name = aliases[key]['planet_aliases'][planet]
+            if name[:len(key)] != key:
+                if verbose: print(f"Found {planet} in aliases, updating to {key+name[-2:]}")
+                return key+name[-2:]
+            elif planet != name:
+                if verbose: print(f"Found {planet} in aliases, updating to {name}")
+                return name
     return planet
