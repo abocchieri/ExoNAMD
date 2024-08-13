@@ -449,13 +449,13 @@ def solve_a_rs(sma, rstar, ars):
         return sma, rstar, ars
 
     if np.isnan(sma):
-        sma = ars * rstar * cc.R_sun / cc.au
-        sma = sma.value
+        sma = ars * rstar * u.R_sun
+        sma = sma.to(u.au).value
     elif np.isnan(rstar):
-        rstar = sma * cc.au / ars
+        rstar = sma * u.au / ars
         rstar = rstar.to(u.R_sun).value
     elif np.isnan(ars):
-        ars = sma * cc.au / (rstar * cc.R_sun)
+        ars = sma * u.au / (rstar * u.R_sun).to(u.au)
         ars = ars.value
 
     return sma, rstar, ars
@@ -480,13 +480,13 @@ def solve_rprs(rplanet, rstar, rprs):
         return rplanet, rstar, rprs
 
     if np.isnan(rplanet):
-        rplanet = rprs * (rstar * cc.R_sun)
+        rplanet = rprs * (rstar * u.R_sun)
         rplanet = rplanet.to(u.R_earth).value
     elif np.isnan(rstar):
-        rstar = rplanet * cc.R_earth / rprs
+        rstar = rplanet * u.R_earth / rprs
         rstar = rstar.to(u.R_sun).value
     elif np.isnan(rprs):
-        rprs = rplanet * cc.R_earth / (rstar * cc.R_sun)
+        rprs = rplanet * u.R_earth / (rstar * u.R_sun).to(u.R_earth)
         rprs = rprs.value
 
     return rplanet, rstar, rprs
@@ -512,15 +512,13 @@ def solve_a_period(period, sma, mstar):
 
     two_pi_G = 2.0 * np.pi / np.sqrt(cc.G)
     if np.isnan(mstar):
-        mstar = (sma * cc.au) ** 3.0 / (period * u.day / two_pi_G) ** 2.0
+        mstar = (sma * u.au) ** 3.0 / (period * u.day / two_pi_G) ** 2.0
         mstar = mstar.to(u.M_sun).value
     elif np.isnan(period):
-        period = np.sqrt((sma * cc.au) ** 3.0 / (mstar * cc.M_sun)) * two_pi_G
+        period = np.sqrt((sma * u.au) ** 3.0 / (mstar * u.M_sun)) * two_pi_G
         period = period.to(u.day).value
     elif np.isnan(sma):
-        sma = ((period * u.day / two_pi_G) ** 2.0 * (mstar * cc.M_sun)) ** (
-            1 / 3
-        ) / cc.au
-        sma = sma.value
+        sma = ((period * u.day / two_pi_G) ** 2.0 * (mstar * u.M_sun)) ** (1 / 3)
+        sma = sma.to(u.au).value
 
     return period, sma, mstar
