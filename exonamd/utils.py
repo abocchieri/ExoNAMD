@@ -11,10 +11,10 @@ from astropy import constants as cc
 from astropy import units as u
 
 
-ROOT = os.path.realpath(os.path.dirname(__file__)) + '/'
+ROOT = os.path.realpath(os.path.dirname(__file__)) + "/"
 
 
-# Functions below are from gen_tso 
+# Functions below are from gen_tso
 # by Patricio Cubillos: https://github.com/pcubillos/gen_tso
 # modified to work in this project
 
@@ -33,10 +33,10 @@ def get_host(name):
     """
     if is_letter(name):
         return name[:-2]
-    if '.' in name:
-        idx = name.rfind('.')
+    if "." in name:
+        idx = name.rfind(".")
         return name[:idx]
-    return ''
+    return ""
 
 
 def get_letter(name):
@@ -53,24 +53,24 @@ def get_letter(name):
     """
     if is_letter(name):
         return name[-2:]
-    if '.' in name:
-        idx = name.rfind('.')
+    if "." in name:
+        idx = name.rfind(".")
         return name[idx:]
-    return ''
+    return ""
 
 
 def is_letter(name):
     """
     Check if name ends with a blank + lower-case letter (it's a planet)
     """
-    return name[-1].islower() and name[-2] == ' '
+    return name[-1].islower() and name[-2] == " "
 
 
 def is_candidate(name):
     """
     Check if name ends with a blank + lower-case letter (it's a planet)
     """
-    return len(name)>=3 and name[-3] == '.' and name[-2:].isnumeric()
+    return len(name) >= 3 and name[-3] == "." and name[-2:].isnumeric()
 
 
 def invert_aliases(aliases):
@@ -78,7 +78,7 @@ def invert_aliases(aliases):
     Invert an {alias:name} dictionary into {name:aliases_list}
     """
     aka = {}
-    for key,val in aliases.items():
+    for key, val in aliases.items():
         if val not in aka:
             aka[val] = []
         aka[val].append(key)
@@ -117,11 +117,13 @@ def fetch_nea_aliases(targets):
         targets = [targets]
     ntargets = len(targets)
 
-    urls = np.array([
-        'https://exoplanetarchive.ipac.caltech.edu/cgi-bin/Lookup/'
-        f'nph-aliaslookup.py?objname={urllib.parse.quote(target)}'
-        for target in targets
-    ])
+    urls = np.array(
+        [
+            "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/Lookup/"
+            f"nph-aliaslookup.py?objname={urllib.parse.quote(target)}"
+            for target in targets
+        ]
+    )
 
     def fetch_url(url):
         try:
@@ -133,7 +135,7 @@ def fetch_nea_aliases(targets):
     fetch_status = np.tile(2, ntargets)
     responses = np.tile({}, ntargets)
     n_attempts = 0
-    while np.any(fetch_status>0) and n_attempts < 10:
+    while np.any(fetch_status > 0) and n_attempts < 10:
         n_attempts += 1
         mask = fetch_status > 0
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -154,35 +156,35 @@ def fetch_nea_aliases(targets):
             responses[i] = r.json()
             fetch_status[i] = 0
         fetched = np.sum(fetch_status <= 0)
-        print(f'Fetched {fetched}/{ntargets} entries on try {n_attempts}')
+        print(f"Fetched {fetched}/{ntargets} entries on try {n_attempts}")
 
     host_aliases_list = []
     planet_aliases_list = []
-    for i,resp in enumerate(responses):
+    for i, resp in enumerate(responses):
         if resp == {}:
             print(f"NEA alias fetching failed for '{targets[i]}'")
             host_aliases_list.append({})
             planet_aliases_list.append({})
             continue
-        if resp['manifest']['lookup_status'] == 'System Not Found':
+        if resp["manifest"]["lookup_status"] == "System Not Found":
             print(f"NEA alias not found for '{targets[i]}'")
             host_aliases_list.append({})
             planet_aliases_list.append({})
             continue
 
         host_aliases = {}
-        star_set = resp['system']['objects']['stellar_set']['stars']
+        star_set = resp["system"]["objects"]["stellar_set"]["stars"]
         for star in star_set.keys():
-            if 'is_host' not in star_set[star]:
+            if "is_host" not in star_set[star]:
                 continue
-            for alias in star_set[star]['alias_set']['aliases']:
+            for alias in star_set[star]["alias_set"]["aliases"]:
                 host_aliases[alias] = star
         host_aliases_list.append(host_aliases)
 
         planet_aliases = {}
-        planet_set = resp['system']['objects']['planet_set']['planets']
+        planet_set = resp["system"]["objects"]["planet_set"]["planets"]
         for planet in planet_set.keys():
-            for alias in planet_set[planet]['alias_set']['aliases']:
+            for alias in planet_set[planet]["alias_set"]["aliases"]:
                 planet_aliases[alias] = planet
         planet_aliases_list.append(planet_aliases)
 
@@ -210,9 +212,7 @@ def get_children(host_aliases, planet_aliases):
             children.append(planet)
 
     aliases = {
-        alias:planet
-        for alias,planet in planet_aliases.items()
-        if planet in children
+        alias: planet for alias, planet in planet_aliases.items() if planet in children
     }
     return aliases
 
@@ -227,10 +227,10 @@ def fetch_simbad_aliases(target, verbose=True):
     >>> aliases, ks_mag = fetch_simbad_aliases('WASP-69b')
     """
     simbad.reset_votable_fields()
-    simbad.remove_votable_fields('coordinates')
+    simbad.remove_votable_fields("coordinates")
     simbad.add_votable_fields("otype", "otypes", "ids")
     simbad.add_votable_fields("flux(K)")
-    #simbad.add_votable_fields("fe_h")
+    # simbad.add_votable_fields("fe_h")
 
     host_alias = []
     kmag = np.nan
@@ -239,29 +239,29 @@ def fetch_simbad_aliases(target, verbose=True):
         simbad_info = simbad.query_object(target)
     if simbad_info is None:
         if verbose:
-            print(f'no Simbad entry for target {repr(target)}')
+            print(f"no Simbad entry for target {repr(target)}")
         return host_alias, kmag
 
-    object_type = simbad_info['OTYPE'].value.data[0]
-    if 'Planet' in object_type:
+    object_type = simbad_info["OTYPE"].value.data[0]
+    if "Planet" in object_type:
         if target[-1].isalpha():
             host = target[:-1]
-        elif '.' in target:
-            end = target.rindex('.')
+        elif "." in target:
+            end = target.rindex(".")
             host = target[:end]
         else:
-            #target_id = simbad_info['MAIN_ID'].value.data[0]
+            # target_id = simbad_info['MAIN_ID'].value.data[0]
             return host_alias, kmag
         # go after star
         simbad_info = simbad.query_object(host)
         if simbad_info is None:
             if verbose:
-                print(f'Simbad host {repr(host)} not found')
+                print(f"Simbad host {repr(host)} not found")
             return host_alias, kmag
 
-    host_info = simbad_info['IDS'].value.data[0]
-    host_alias = host_info.split('|')
-    kmag = simbad_info['FLUX_K'].value.data[0]
+    host_info = simbad_info["IDS"].value.data[0]
+    host_alias = host_info.split("|")
+    kmag = simbad_info["FLUX_K"].value.data[0]
     # fetch metallicity?
     if not np.isfinite(kmag):
         kmag = np.nan
@@ -323,17 +323,15 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
                 break
 
         h_aliases = [
-            alias
-            for alias,host in host_aliases[i].items()
-            if host == host_name
+            alias for alias, host in host_aliases[i].items() if host == host_name
         ]
         if len(stars) == 1:
             p_aliases = planet_aliases[i].copy()
         else:
             p_aliases = get_children(h_aliases, planet_aliases[i])
         p_aliases = {
-            re.sub(r'\s+', ' ', key): val
-            for key,val in p_aliases.items()
+            re.sub(r"\s+", " ", key): val
+            for key, val in p_aliases.items()
             if is_letter(key) or is_candidate(key)
         }
         children_names = np.unique(list(p_aliases.values()))
@@ -342,12 +340,12 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
         s_aliases, kmag = fetch_simbad_aliases(host_name, verbose=False)
         new_aliases = []
         for alias in s_aliases:
-            alias = re.sub(r'\s+', ' ', alias)
+            alias = re.sub(r"\s+", " ", alias)
             is_new = (
-                alias.startswith('G ') or
-                alias.startswith('GJ ') or
-                alias.startswith('Wolf ') or
-                alias.startswith('2MASS ')
+                alias.startswith("G ")
+                or alias.startswith("GJ ")
+                or alias.startswith("Wolf ")
+                or alias.startswith("2MASS ")
             )
             if is_new and alias not in h_aliases:
                 new_aliases.append(alias)
@@ -358,51 +356,40 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
         for planet, pals in planet_aka.items():
             for host in h_aliases:
                 letter = get_letter(planet)
-                planet_name = f'{host}{letter}'
+                planet_name = f"{host}{letter}"
                 # The conditions to add a target:
                 is_new = planet_name not in pals
                 # There is a planet or a candidate in list
-                planet_exists = np.any([
-                    get_host(p) == host and is_letter(p)
-                    for p in pals
-                ])
-                candidate_exists = np.any([
-                    get_host(p) == host and is_candidate(p)
-                    for p in pals
-                ])
-                # Do not downgrade planet -> candidate
-                not_downgrade = not (
-                    is_candidate(planet_name) and
-                    planet_exists
+                planet_exists = np.any(
+                    [get_host(p) == host and is_letter(p) for p in pals]
                 )
+                candidate_exists = np.any(
+                    [get_host(p) == host and is_candidate(p) for p in pals]
+                )
+                # Do not downgrade planet -> candidate
+                not_downgrade = not (is_candidate(planet_name) and planet_exists)
                 # No previous alias (hold-off TESS names)
                 new_entry = (
-                    not planet_exists and
-                    not candidate_exists and
-                    not planet_name.startswith('TOI')
+                    not planet_exists
+                    and not candidate_exists
+                    and not planet_name.startswith("TOI")
                 )
                 # There is a letter version of it with same root
-                letter_exists = np.any([
-                    p.startswith(host) and is_letter(p)
-                    for p in pals
-                ])
-                # Upgrade candidate->planet only if is lettered anywhere else
-                upgrade = (
-                    is_letter(planet_name) and
-                    candidate_exists and
-                    letter_exists
+                letter_exists = np.any(
+                    [p.startswith(host) and is_letter(p) for p in pals]
                 )
+                # Upgrade candidate->planet only if is lettered anywhere else
+                upgrade = is_letter(planet_name) and candidate_exists and letter_exists
                 if is_new and not_downgrade and (new_entry or upgrade):
                     p_aliases[planet_name] = planet
 
         system = {
-            'host': host_name,
-            'planets': children_names,
-            'host_aliases': h_aliases,
-            'planet_aliases': p_aliases,
+            "host": host_name,
+            "planets": children_names,
+            "host_aliases": h_aliases,
+            "planet_aliases": p_aliases,
         }
         aliases[host_name] = system
-
 
     # Add previously known aliases (but give priority to the new ones)
     for host in list(known_aliases):
@@ -410,32 +397,35 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
             aliases[host] = known_aliases[host]
 
     if output_file is not None:
-        with open(output_file, 'wb') as handle:
+        with open(output_file, "wb") as handle:
             pickle.dump(aliases, handle, protocol=4)
 
     return aliases
 
 
 def update_host(row, aliases, verbose=False):
-    host = row['hostname']
+    host = row["hostname"]
     for key in aliases.keys():
-        if host in aliases[key]['host_aliases']:
+        if host in aliases[key]["host_aliases"]:
             if host != key:
-                if verbose: print(f"Found {host} in aliases, updating to {key}")
+                if verbose:
+                    print(f"Found {host} in aliases, updating to {key}")
             return key
     return host
 
 
 def update_planet(row, aliases, verbose=False):
-    planet = row['pl_name']
+    planet = row["pl_name"]
     for key in aliases.keys():
-        if planet in aliases[key]['planet_aliases'].keys():
-            name = aliases[key]['planet_aliases'][planet]
-            if name[:len(key)] != key:
-                if verbose: print(f"Found {planet} in aliases, updating to {key+name[-2:]}")
-                return key+name[-2:]
+        if planet in aliases[key]["planet_aliases"].keys():
+            name = aliases[key]["planet_aliases"][planet]
+            if name[: len(key)] != key:
+                if verbose:
+                    print(f"Found {planet} in aliases, updating to {key+name[-2:]}")
+                return key + name[-2:]
             elif planet != name:
-                if verbose: print(f"Found {planet} in aliases, updating to {name}")
+                if verbose:
+                    print(f"Found {planet} in aliases, updating to {name}")
                 return name
     return planet
 
@@ -453,23 +443,19 @@ def solve_a_rs(sma, rstar, ars):
     ars: Float
         sma--rstar ratio.
     """
-    missing = (
-        np.isnan(sma) +
-        np.isnan(ars) +
-        np.isnan(rstar)
-    )
+    missing = np.isnan(sma) + np.isnan(ars) + np.isnan(rstar)
     # Know everything or not enough:
     if missing != 1:
-       return sma, rstar, ars
+        return sma, rstar, ars
 
     if np.isnan(sma):
-        sma = ars * rstar*cc.R_sun / cc.au
+        sma = ars * rstar * cc.R_sun / cc.au
         sma = sma.value
     elif np.isnan(rstar):
-        rstar = sma*cc.au / ars
+        rstar = sma * cc.au / ars
         rstar = rstar.to(u.R_sun).value
     elif np.isnan(ars):
-        ars = sma*cc.au / (rstar*cc.R_sun)
+        ars = sma * cc.au / (rstar * cc.R_sun)
         ars = ars.value
 
     return sma, rstar, ars
@@ -488,23 +474,19 @@ def solve_rprs(rplanet, rstar, rprs):
     rprs: Float
         Planet--star radius ratio.
     """
-    missing = (
-        np.isnan(rplanet) +
-        np.isnan(rstar) +
-        np.isnan(rprs)
-    )
+    missing = np.isnan(rplanet) + np.isnan(rstar) + np.isnan(rprs)
     # Know everything or not enough:
     if missing != 1:
         return rplanet, rstar, rprs
 
     if np.isnan(rplanet):
-        rplanet = rprs * (rstar*cc.R_sun)
+        rplanet = rprs * (rstar * cc.R_sun)
         rplanet = rplanet.to(u.R_earth).value
     elif np.isnan(rstar):
-        rstar = rplanet*cc.R_earth / rprs
+        rstar = rplanet * cc.R_earth / rprs
         rstar = rstar.to(u.R_sun).value
     elif np.isnan(rprs):
-        rprs = rplanet*cc.R_earth / (rstar*cc.R_sun)
+        rprs = rplanet * cc.R_earth / (rstar * cc.R_sun)
         rprs = rprs.value
 
     return rplanet, rstar, rprs
@@ -523,24 +505,22 @@ def solve_a_period(period, sma, mstar):
     mstar: Float
         Stellar mass (m_sun).
     """
-    missing = (
-        np.isnan(period) +
-        np.isnan(sma) +
-        np.isnan(mstar)
-    )
+    missing = np.isnan(period) + np.isnan(sma) + np.isnan(mstar)
     # Know everything or not enough:
     if missing != 1:
         return period, sma, mstar
 
-    two_pi_G = 2.0*np.pi / np.sqrt(cc.G)
+    two_pi_G = 2.0 * np.pi / np.sqrt(cc.G)
     if np.isnan(mstar):
-        mstar = (sma*cc.au)**3.0 / (period*u.day/two_pi_G)**2.0
+        mstar = (sma * cc.au) ** 3.0 / (period * u.day / two_pi_G) ** 2.0
         mstar = mstar.to(u.M_sun).value
     elif np.isnan(period):
-        period = np.sqrt((sma*cc.au)**3.0 / (mstar*cc.M_sun)) * two_pi_G
+        period = np.sqrt((sma * cc.au) ** 3.0 / (mstar * cc.M_sun)) * two_pi_G
         period = period.to(u.day).value
     elif np.isnan(sma):
-        sma = ((period*u.day/two_pi_G)**2.0 * (mstar*cc.M_sun))**(1/3) / cc.au
+        sma = ((period * u.day / two_pi_G) ** 2.0 * (mstar * cc.M_sun)) ** (
+            1 / 3
+        ) / cc.au
         sma = sma.value
 
     return period, sma, mstar
