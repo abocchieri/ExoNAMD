@@ -9,9 +9,10 @@ import warnings
 from astroquery.simbad import Simbad as simbad
 from astropy import constants as cc
 from astropy import units as u
+from pathlib import Path
 
 
-ROOT = os.path.realpath(os.path.dirname(__file__)) + "/"
+ROOT = os.path.realpath(os.path.dirname(__file__))
 
 
 # Functions below are from gen_tso
