@@ -415,8 +415,8 @@ def update_host(row, aliases):
 
 def update_planet(row, aliases):
     planet = row["pl_name"]
-    planet_aliases = aliases[key]["planet_aliases"]
-    for key in aliases.keys():
+    for key, item in aliases.items():
+        planet_aliases = item["planet_aliases"]
         if planet in planet_aliases.keys():
             name = planet_aliases[planet]
             if name[: len(key)] != key:
