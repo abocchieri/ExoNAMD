@@ -35,7 +35,7 @@ dependencies = [
     "numpy",
     "matplotlib",
     "swifter",
-    "modin[all]",
+    "modin[dask]",
 ]
 
 [project.readme]

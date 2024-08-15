@@ -40,6 +40,7 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
 
     if (
         np.isnan(mass)
+        and not np.isnan(radius)
         and radius > min_radius
         and radius < max_radius
         and not np.isnan(radiuserr1)
