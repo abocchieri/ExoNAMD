@@ -102,9 +102,11 @@ def interp_inclination(row, df):
 
     else:
         # i.e., the most massive planet reports inclination
-        incl = host.loc[mass_max, "pl_orbincl"]
-        inclerr1 = host.loc[mass_max, "pl_orbinclerr1"]
-        inclerr2 = host.loc[mass_max, "pl_orbinclerr2"]
+        mass_max_data = host.loc[mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]]
+
+        incl = mass_max_data["pl_orbincl"]
+        inclerr1 = 0.0 if np.isnan(mass_max_data["pl_orbinclerr1"]) else mass_max_data["pl_orbinclerr1"]
+        inclerr2 = 0.0 if np.isnan(mass_max_data["pl_orbinclerr2"]) else mass_max_data["pl_orbinclerr2"]
         flag += "3+-"
 
     return incl, inclerr1, inclerr2, flag
