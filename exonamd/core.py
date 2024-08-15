@@ -74,7 +74,7 @@ def compute_namd_mcmc(
             & (pl_df_mcmc_samples[f"pl_bmasse_{pl_name}"] >= 0)
         )
 
-        pl_df_mcmc_samples[f"amd_{pl_name}"] = amd(
+        pl_df_mcmc_samples[f"amd_{pl_name}"] = compute_amd(
             pl_df_mcmc_samples[f"pl_bmasse_{pl_name}"],
             pl_df_mcmc_samples[f"pl_orbeccen_{pl_name}"],
             pl_df_mcmc_samples[f"pl_relincl_{pl_name}"],
@@ -167,7 +167,7 @@ def namd_loop(df: pd.DataFrame, Npt: int = 100000):
     for k, name in enumerate(df.hostname.unique()):
         df_namd.loc[k, "hostname"] = name
         df_namd.loc[k, "flag"] = df[df["hostname"] == name]["flag"].values
-        retval = compute_namd(name, df, Npt=Npt, do_plot=False)
+        retval = compute_namd_mcmc(name, df, Npt=Npt, do_plot=False)
         df_namd.loc[k, "namd"] = retval["q50"]
         df_namd.loc[k, "namd_err1"] = retval["q84"] - retval["q50"]
         df_namd.loc[k, "namd_err2"] = retval["q50"] - retval["q16"]
