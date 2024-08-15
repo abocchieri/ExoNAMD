@@ -2,9 +2,11 @@ import numpy as np
 import astropy.constants as cc
 import astropy.units as u
 import pandas as pd
+
 # import modin.pandas as pd
 
 from exonamd.core import compute_amd
+from exonamd.core import compute_namd
 
 
 def solve_a_rs(sma, rstar, ars):
@@ -147,20 +149,66 @@ def solve_relincl(row, df):
         mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
     ]
 
-    relincl = incl - max_mass_data["pl_orbincl"]
+    relincl = max_mass_data["pl_orbincl"] - incl
     relinclerr1 = np.sqrt(inclerr1**2 + max_mass_data["pl_orbinclerr1"] ** 2)
     relinclerr2 = np.sqrt(inclerr2**2 + max_mass_data["pl_orbinclerr2"] ** 2)
 
     return pd.Series([relincl, relinclerr1, relinclerr2])
 
 
-def solve_amd(row):
+def solve_amd_rel(row):
 
-    amd = compute_amd(
+    amd_rel = compute_amd(
         row["pl_bmasse"],
         row["pl_orbeccen"],
         row["pl_relincl"],
         row["pl_orbsmax"],
     )
 
-    return pd.Series([amd])
+    return pd.Series([amd_rel])
+
+
+def solve_amd_abs(row):
+
+    amd_abs = compute_amd(
+        row["pl_bmasse"],
+        row["pl_orbeccen"],
+        row["pl_trueobliq"],
+        row["pl_orbsmax"],
+    )
+
+    return pd.Series([amd_abs])
+
+
+def solve_namd_rel(row, df):
+
+    if "namd_rel" in row.index:
+        return row["namd_rel"]
+
+    hostname = row["hostname"]
+    host = df[df["hostname"] == hostname]
+
+    amd_rel = host["amd_rel"]
+    mass = host["pl_bmasse"]
+    sma = host["pl_orbsmax"]
+
+    namd_rel = compute_namd(amd_rel, mass, sma)
+
+    return pd.Series([namd_rel])
+
+
+def solve_namd_abs(row, df):
+
+    if "namd_abs" in row.index:
+        return row["namd_abs"]
+
+    hostname = row["hostname"]
+    host = df[df["hostname"] == hostname]
+
+    amd_abs = host["amd_abs"]
+    mass = host["pl_bmasse"]
+    sma = host["pl_orbsmax"]
+
+    namd_abs = compute_namd(amd_abs, mass, sma)
+
+    return pd.Series([namd_abs])
