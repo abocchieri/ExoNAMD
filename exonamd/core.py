@@ -3,15 +3,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def amd(m: np.array, e: np.array, i: np.array, a: np.array) -> np.array:
+def compute_amd(m: np.array, e: np.array, i: np.array, a: np.array) -> np.array:
     return m * np.sqrt(a) * (1 - np.sqrt(1 - e**2) * np.cos(np.deg2rad(i)))
 
 
-def namd(amd: np.array, m: np.array, a: np.array) -> float:
+def compute_namd(amd: np.array, m: np.array, a: np.array) -> float:
     return np.sum(amd) / np.sum(m * np.sqrt(a))
 
 
-def compute_namd(
+def compute_namd_mcmc(
     userid: str,
     df: pd.DataFrame,
     Npt: int,

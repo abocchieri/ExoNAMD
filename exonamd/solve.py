@@ -4,6 +4,7 @@ import astropy.units as u
 import pandas as pd
 # import modin.pandas as pd
 
+from exonamd.core import compute_amd
 
 
 def solve_a_rs(sma, rstar, ars):
@@ -151,3 +152,15 @@ def solve_relincl(row, df):
     relinclerr2 = np.sqrt(inclerr2**2 + max_mass_data["pl_orbinclerr2"] ** 2)
 
     return pd.Series([relincl, relinclerr1, relinclerr2])
+
+
+def solve_amd(row):
+
+    amd = compute_amd(
+        row["pl_bmasse"],
+        row["pl_orbeccen"],
+        row["pl_relincl"],
+        row["pl_orbsmax"],
+    )
+
+    return pd.Series([amd])
