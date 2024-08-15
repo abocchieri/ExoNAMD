@@ -404,28 +404,23 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
     return aliases
 
 
-def update_host(row, aliases, verbose=False):
+def update_host(row, aliases):
     host = row["hostname"]
+    host_aliases = aliases[host]["host_aliases"]
     for key in aliases.keys():
-        if host in aliases[key]["host_aliases"]:
-            if host != key:
-                if verbose:
-                    print(f"Found {host} in aliases, updating to {key}")
+        if host in host_aliases:
             return key
     return host
 
 
-def update_planet(row, aliases, verbose=False):
+def update_planet(row, aliases):
     planet = row["pl_name"]
+    planet_aliases = aliases[key]["planet_aliases"]
     for key in aliases.keys():
-        if planet in aliases[key]["planet_aliases"].keys():
-            name = aliases[key]["planet_aliases"][planet]
+        if planet in planet_aliases.keys():
+            name = planet_aliases[planet]
             if name[: len(key)] != key:
-                if verbose:
-                    print(f"Found {planet} in aliases, updating to {key+name[-2:]}")
                 return key + name[-2:]
             elif planet != name:
-                if verbose:
-                    print(f"Found {planet} in aliases, updating to {name}")
                 return name
     return planet
