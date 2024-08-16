@@ -259,7 +259,7 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
         return pd.Series(out)
 
     amd = amd.compressed()
-    amd_p = np.percentile(amd, [0.16, 0.5, 0.84])
+    amd_p = np.percentile(amd, [16, 50, 84])
 
     out = {
         f"amd_{kind}_mc": amd if full else np.nan,
@@ -292,7 +292,7 @@ def solve_namd_mc(host, kind, Npt, threshold, full=False):
 
         return pd.Series(out)
 
-    namd_p = np.percentile(namd, [0.16, 0.5, 0.84])
+    namd_p = np.percentile(namd, [16, 50, 84])
 
     out = {
         f"namd_{kind}_mc": namd if full else np.nan,

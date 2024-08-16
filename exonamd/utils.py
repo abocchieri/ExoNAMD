@@ -424,3 +424,8 @@ def update_planet(row, aliases):
             elif planet != name:
                 return name
     return planet
+
+
+def groupby_apply_merge(df, groupby, func, *args, **kwargs):
+    retval = df.groupby(groupby).apply(func, *args, **kwargs)
+    return df.merge(retval, left_on=groupby, right_index=True)
