@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 # import modin.pandas as pd
 from spright import RMRelation
 
@@ -31,7 +32,6 @@ def interp_eccentricity(row):
 
 
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
-
     mass = row["pl_bmasse"]
     masserr1 = row["pl_bmasseerr1"]
     masserr2 = row["pl_bmasseerr2"]
@@ -67,7 +67,6 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
 
 
 def interp_inclination(row, df):
-
     hostname = row["hostname"]
     incl = row["pl_orbincl"]
     inclerr1 = row["pl_orbinclerr1"]
@@ -88,7 +87,7 @@ def interp_inclination(row, df):
             inclerr2 = 0.0
             flag += "3-"
 
-    elif len(inclnan) == len(host):  
+    elif len(inclnan) == len(host):
         # i.e., all planets have inclination nan
         incl = 90.0
         inclerr1 = 0.0
@@ -100,7 +99,9 @@ def interp_inclination(row, df):
         # here we set the inclination to the next most massive planet
         inclnotnan = host[host["pl_orbincl"].notnull()]
         next_mass_max = inclnotnan["pl_bmasse"].idxmax()
-        next_mass_max_data = host.loc[next_mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]]
+        next_mass_max_data = host.loc[
+            next_mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
+        ]
 
         incl = next_mass_max_data["pl_orbincl"]
         inclerr1 = next_mass_max_data["pl_orbinclerr1"]
@@ -111,7 +112,9 @@ def interp_inclination(row, df):
 
     else:
         # i.e., the most massive planet reports inclination
-        mass_max_data = host.loc[mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]]
+        mass_max_data = host.loc[
+            mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
+        ]
 
         incl = mass_max_data["pl_orbincl"]
         inclerr1 = mass_max_data["pl_orbinclerr1"]
@@ -124,7 +127,6 @@ def interp_inclination(row, df):
 
 
 def interp_sma(row):
-
     smaerr1 = row["pl_orbsmaxerr1"]
     smaerr2 = row["pl_orbsmaxerr2"]
     flag = row["flag"]
@@ -141,7 +143,6 @@ def interp_sma(row):
 
 
 def interp_trueobliq(row, df):
-
     hostname = row["hostname"]
     obliq = row["pl_trueobliq"]
     obliqerr1 = row["pl_trueobliqerr1"]

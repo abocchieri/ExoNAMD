@@ -110,7 +110,6 @@ def solve_a_period(period, sma, mstar):
 
 
 def solve_values(row):
-
     sma = row["pl_orbsmax"]
     ars = row["pl_ratdor"]
     rstar = row["st_rad"]
@@ -163,7 +162,6 @@ def solve_relincl(row, df):
 
 
 def solve_amd(row, kind: str):
-
     mass = row["pl_bmasse"]
     eccen = row["pl_orbeccen"]
     di = {"rel": row["pl_relincl"], "abs": row["pl_trueobliq"]}
@@ -176,7 +174,6 @@ def solve_amd(row, kind: str):
 
 
 def solve_namd(host, kind: str):
-
     amd = host[f"amd_{kind}"]
     mass = host["pl_bmasse"]
     sqrt_sma = np.sqrt(host["pl_orbsmax"])
@@ -190,7 +187,6 @@ def solve_namd(host, kind: str):
 
 
 def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
-
     mass = row["pl_bmasse"]
     masserr1 = row["pl_bmasseerr1"]
     masserr2 = row["pl_bmasseerr2"]
@@ -236,7 +232,6 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
 
     # Check number of valid samples
     if len(mass_mc.compressed()) < threshold:
-
         out = {
             f"amd_{kind}_mc": np.nan,
             f"amd_{kind}_q16": np.nan,
@@ -272,7 +267,6 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
 
 
 def solve_namd_mc(host, kind, Npt, threshold, full=False):
-
     retval = host.apply(solve_amd_mc, args=(kind, Npt, threshold, True), axis=1)
     amd = retval[f"amd_{kind}_mc"]
     mass = retval[f"mass_{kind}_mc"]
@@ -282,7 +276,6 @@ def solve_namd_mc(host, kind, Npt, threshold, full=False):
     namd = namd.compressed()
 
     if len(namd) < threshold:
-
         out = {
             f"namd_{kind}_mc": np.nan,
             f"namd_{kind}_q16": np.nan,

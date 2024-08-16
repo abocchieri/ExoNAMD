@@ -12,7 +12,6 @@ def download_nasa_confirmed_planets(
     sy_pnum=1,
     from_scratch=False,
 ):
-
     if from_scratch:
         df_old = None
         latest = datetime.strptime("1990-01-01", "%Y-%m-%d")

@@ -11,7 +11,6 @@ def simple_plot(
     scale="linear",
     bins=50,
 ):
-
     samples = data[f"{which}_{kind}_mc"]
     q50 = data[f"{which}_{kind}_q50"]
     q16 = data[f"{which}_{kind}_q16"]
