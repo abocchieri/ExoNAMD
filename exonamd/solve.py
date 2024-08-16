@@ -272,3 +272,42 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False):
     }
 
     return pd.Series(out)
+
+
+def solve_namd_mc(row, df, kind, Npt, threshold, plot=False):
+
+    if not plot and f"namd_{kind}_q50" in row.index:
+        return row[[f"namd_{kind}_q16", f"namd_{kind}_q50", f"namd_{kind}_q84"]]
+
+    hostname = row["hostname"]
+    host = df[df["hostname"] == hostname]
+
+    retval = host.apply(solve_amd_mc, args=(kind, Npt, threshold, True), axis=1)
+    amd = retval[f"amd_{kind}_mc"]
+    mass = retval[f"mass_{kind}_mc"]
+    sqrt_sma = retval[f"sqrt_sma_{kind}_mc"]
+
+    namd = compute_namd(amd, mass, sqrt_sma)
+
+    if plot:
+        return namd
+
+    if len(namd.compressed()) < threshold:
+
+        out = {
+            f"namd_{kind}_q16": np.nan,
+            f"namd_{kind}_q50": np.nan,
+            f"namd_{kind}_q84": np.nan,
+        }
+
+        return pd.Series(out)
+
+    namd_p = np.percentile(namd.compressed(), [0.16, 0.5, 0.84])
+
+    out = {
+        f"namd_{kind}_q16": namd_p[0],
+        f"namd_{kind}_q50": namd_p[1],
+        f"namd_{kind}_q84": namd_p[2],
+    }
+
+    return pd.Series(out)
