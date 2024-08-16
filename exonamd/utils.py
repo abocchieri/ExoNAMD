@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = os.path.realpath(os.path.dirname(__file__))
 
 
-# Functions below are from gen_tso
+# Functions below are originally from gen_tso
 # by Patricio Cubillos: https://github.com/pcubillos/gen_tso
 # modified to work in this project
 

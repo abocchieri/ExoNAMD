@@ -9,6 +9,12 @@ from exonamd.core import compute_amd
 from exonamd.core import compute_namd
 
 
+# Functions solve_a_rs, solve_rprs, solve_a_period, solve_values
+# below are originally from gen_tso
+# by Patricio Cubillos: https://github.com/pcubillos/gen_tso
+# modified to work in this project
+
+
 def solve_a_rs(sma, rstar, ars):
     """
     Solve semi-major axis -- stellar radius system of equations.
@@ -151,64 +157,118 @@ def solve_relincl(row, df):
 
     relincl = max_mass_data["pl_orbincl"] - incl
     relinclerr1 = np.sqrt(inclerr1**2 + max_mass_data["pl_orbinclerr1"] ** 2)
-    relinclerr2 = np.sqrt(inclerr2**2 + max_mass_data["pl_orbinclerr2"] ** 2)
+    relinclerr2 = -np.sqrt(inclerr2**2 + max_mass_data["pl_orbinclerr2"] ** 2)
 
     return pd.Series([relincl, relinclerr1, relinclerr2])
 
 
-def solve_amd_rel(row):
+def solve_amd(row, kind: str):
 
-    amd_rel = compute_amd(
-        row["pl_bmasse"],
-        row["pl_orbeccen"],
-        row["pl_relincl"],
-        row["pl_orbsmax"],
-    )
+    mass = row["pl_bmasse"]
+    eccen = row["pl_orbeccen"]
+    di = {"rel": row["pl_relincl"], "abs": row["pl_trueobliq"]}
+    di = di[kind]
+    sma = row["pl_orbsmax"]
 
-    return pd.Series([amd_rel])
+    amd = compute_amd(mass, eccen, di, sma)
 
-
-def solve_amd_abs(row):
-
-    amd_abs = compute_amd(
-        row["pl_bmasse"],
-        row["pl_orbeccen"],
-        row["pl_trueobliq"],
-        row["pl_orbsmax"],
-    )
-
-    return pd.Series([amd_abs])
+    return pd.Series([amd])
 
 
-def solve_namd_rel(row, df):
+def solve_namd(row, df, kind: str):
 
-    if "namd_rel" in row.index:
-        return row["namd_rel"]
+    if f"namd_{kind}" in row.index:
+        return row[f"namd_{kind}"]
 
     hostname = row["hostname"]
     host = df[df["hostname"] == hostname]
 
-    amd_rel = host["amd_rel"]
+    amd = host[f"amd_{kind}"]
     mass = host["pl_bmasse"]
-    sma = host["pl_orbsmax"]
+    sqrt_sma = np.sqrt(host["pl_orbsmax"])
 
-    namd_rel = compute_namd(amd_rel, mass, sma)
+    namd = compute_namd(amd, mass, sqrt_sma)
 
-    return pd.Series([namd_rel])
+    return pd.Series([namd])
 
 
-def solve_namd_abs(row, df):
+def solve_amd_mc(row, kind, Npt, threshold, namd=False):
 
-    if "namd_abs" in row.index:
-        return row["namd_abs"]
+    if not namd and f"amd_{kind}_q50" in row.index:
+        return row[[f"amd_{kind}_q16", f"amd_{kind}_q50", f"amd_{kind}_q84"]]
 
-    hostname = row["hostname"]
-    host = df[df["hostname"] == hostname]
+    mass = row["pl_bmasse"]
+    masserr1 = row["pl_bmasseerr1"]
+    masserr2 = row["pl_bmasseerr2"]
+    eccen = row["pl_orbeccen"]
+    eccenerr1 = row["pl_orbeccenerr1"]
+    eccenerr2 = row["pl_orbeccenerr2"]
 
-    amd_abs = host["amd_abs"]
-    mass = host["pl_bmasse"]
-    sma = host["pl_orbsmax"]
+    di = {
+        "rel": row["pl_relincl"],
+        "relerr1": row["pl_relinclerr1"],
+        "relerr2": row["pl_relinclerr2"],
+        "abs": row["pl_trueobliq"],
+        "abserr1": row["pl_trueobliqerr1"],
+        "abserr2": row["pl_trueobliqerr2"],
+    }
 
-    namd_abs = compute_namd(amd_abs, mass, sma)
+    sma = row["pl_orbsmax"]
+    smaerr1 = row["pl_orbsmaxerr1"]
+    smaerr2 = row["pl_orbsmaxerr2"]
 
-    return pd.Series([namd_abs])
+    # Sample the parameters
+    mass_mc = np.random.normal(mass, 0.5 * (masserr1 - masserr2), Npt)
+    eccen_mc = np.random.normal(eccen, 0.5 * (eccenerr1 - eccenerr2), Npt)
+    di_mc = np.random.normal(
+        di[kind], 0.5 * (di[f"{kind}err1"] - di[f"{kind}err2"]), Npt
+    )
+    sma_mc = np.random.normal(sma, 0.5 * (smaerr1 - smaerr2), Npt)
+
+    # Mask unphysical values
+    mask = (
+        (mass_mc > 0)
+        & (eccen_mc >= 0)
+        & (eccen_mc < 1)
+        & np.abs(di_mc >= 0)
+        & (di_mc < 180)
+        & (sma_mc > 0)
+    )
+
+    mass_mc = np.ma.MaskedArray(mass_mc, mask=~mask)
+    eccen_mc = np.ma.MaskedArray(eccen_mc, mask=~mask)
+    di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
+    sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
+
+    # Check number of valid samples
+    if len(mass_mc.compressed()) < threshold:
+
+        out = {
+            f"amd_{kind}_q16": np.nan,
+            f"amd_{kind}_q50": np.nan,
+            f"amd_{kind}_q84": np.nan,
+        }
+
+        return pd.Series(out)
+
+    # Compute the amd
+    amd = compute_amd(mass_mc, eccen_mc, di_mc, sma_mc)
+
+    if namd:
+        out = {
+            f"amd_{kind}_mc": amd,
+            f"mass_{kind}_mc": mass_mc,
+            f"sqrt_sma_{kind}_mc": np.sqrt(sma_mc),
+        }
+
+        return pd.Series(out)
+
+    amd_p = np.percentile(amd.compressed(), [0.16, 0.5, 0.84])
+
+    out = {
+        f"amd_{kind}_q16": amd_p[0],
+        f"amd_{kind}_q50": amd_p[1],
+        f"amd_{kind}_q84": amd_p[2],
+    }
+
+    return pd.Series(out)
