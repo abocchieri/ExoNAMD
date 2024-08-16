@@ -175,13 +175,7 @@ def solve_amd(row, kind: str):
     return pd.Series([amd])
 
 
-def solve_namd(row, df, kind: str):
-
-    if f"namd_{kind}" in row.index:
-        return row[f"namd_{kind}"]
-
-    hostname = row["hostname"]
-    host = df[df["hostname"] == hostname]
+def solve_namd(host, kind: str):
 
     amd = host[f"amd_{kind}"]
     mass = host["pl_bmasse"]
@@ -189,13 +183,13 @@ def solve_namd(row, df, kind: str):
 
     namd = compute_namd(amd, mass, sqrt_sma)
 
-    return pd.Series([namd])
+    out = {
+        f"namd_{kind}": namd,
+    }
+    return pd.Series(out)
 
 
-def solve_amd_mc(row, kind, Npt, threshold, namd=False):
-
-    if not namd and f"amd_{kind}_q50" in row.index:
-        return row[[f"amd_{kind}_q16", f"amd_{kind}_q50", f"amd_{kind}_q84"]]
+def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
 
     mass = row["pl_bmasse"]
     masserr1 = row["pl_bmasseerr1"]
@@ -244,6 +238,7 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False):
     if len(mass_mc.compressed()) < threshold:
 
         out = {
+            f"amd_{kind}_mc": np.nan,
             f"amd_{kind}_q16": np.nan,
             f"amd_{kind}_q50": np.nan,
             f"amd_{kind}_q84": np.nan,
@@ -263,9 +258,11 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False):
 
         return pd.Series(out)
 
-    amd_p = np.percentile(amd.compressed(), [0.16, 0.5, 0.84])
+    amd = amd.compressed()
+    amd_p = np.percentile(amd, [0.16, 0.5, 0.84])
 
     out = {
+        f"amd_{kind}_mc": amd if full else np.nan,
         f"amd_{kind}_q16": amd_p[0],
         f"amd_{kind}_q50": amd_p[1],
         f"amd_{kind}_q84": amd_p[2],
@@ -274,13 +271,7 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False):
     return pd.Series(out)
 
 
-def solve_namd_mc(row, df, kind, Npt, threshold, plot=False):
-
-    if not plot and f"namd_{kind}_q50" in row.index:
-        return row[[f"namd_{kind}_q16", f"namd_{kind}_q50", f"namd_{kind}_q84"]]
-
-    hostname = row["hostname"]
-    host = df[df["hostname"] == hostname]
+def solve_namd_mc(host, kind, Npt, threshold, full=False):
 
     retval = host.apply(solve_amd_mc, args=(kind, Npt, threshold, True), axis=1)
     amd = retval[f"amd_{kind}_mc"]
@@ -288,13 +279,12 @@ def solve_namd_mc(row, df, kind, Npt, threshold, plot=False):
     sqrt_sma = retval[f"sqrt_sma_{kind}_mc"]
 
     namd = compute_namd(amd, mass, sqrt_sma)
+    namd = namd.compressed()
 
-    if plot:
-        return namd
-
-    if len(namd.compressed()) < threshold:
+    if len(namd) < threshold:
 
         out = {
+            f"namd_{kind}_mc": np.nan,
             f"namd_{kind}_q16": np.nan,
             f"namd_{kind}_q50": np.nan,
             f"namd_{kind}_q84": np.nan,
@@ -302,9 +292,10 @@ def solve_namd_mc(row, df, kind, Npt, threshold, plot=False):
 
         return pd.Series(out)
 
-    namd_p = np.percentile(namd.compressed(), [0.16, 0.5, 0.84])
+    namd_p = np.percentile(namd, [0.16, 0.5, 0.84])
 
     out = {
+        f"namd_{kind}_mc": namd if full else np.nan,
         f"namd_{kind}_q16": namd_p[0],
         f"namd_{kind}_q50": namd_p[1],
         f"namd_{kind}_q84": namd_p[2],
