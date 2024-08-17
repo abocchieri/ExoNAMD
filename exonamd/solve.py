@@ -5,7 +5,7 @@ import pandas as pd
 
 # import modin.pandas as pd
 
-from exonamd.core import compute_amd
+from exonamd.core import compute_amdk
 from exonamd.core import compute_namd
 
 
@@ -161,24 +161,24 @@ def solve_relincl(row, df):
     return pd.Series([relincl, relinclerr1, relinclerr2])
 
 
-def solve_amd(row, kind: str):
+def solve_amdk(row, kind: str):
     mass = row["pl_bmasse"]
     eccen = row["pl_orbeccen"]
     di = {"rel": row["pl_relincl"], "abs": row["pl_trueobliq"]}
     di = di[kind]
     sma = row["pl_orbsmax"]
 
-    amd = compute_amd(mass, eccen, di, sma)
+    amdk = compute_amdk(mass, eccen, di, sma)
 
-    return pd.Series([amd])
+    return pd.Series([amdk])
 
 
 def solve_namd(host, kind: str):
-    amd = host[f"amd_{kind}"]
+    amdk = host[f"amdk_{kind}"]
     mass = host["pl_bmasse"]
     sqrt_sma = np.sqrt(host["pl_orbsmax"])
 
-    namd = compute_namd(amd, mass, sqrt_sma)
+    namd = compute_namd(amdk, mass, sqrt_sma)
 
     out = {
         f"namd_{kind}": namd,
@@ -186,7 +186,7 @@ def solve_namd(host, kind: str):
     return pd.Series(out)
 
 
-def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
+def solve_amdk_mc(row, kind, Npt, threshold, namd=False, full=False):
     mass = row["pl_bmasse"]
     masserr1 = row["pl_bmasseerr1"]
     masserr2 = row["pl_bmasseerr2"]
@@ -233,46 +233,45 @@ def solve_amd_mc(row, kind, Npt, threshold, namd=False, full=False):
     # Check number of valid samples
     if len(mass_mc.compressed()) < threshold:
         out = {
-            f"amd_{kind}_mc": np.nan,
-            f"amd_{kind}_q16": np.nan,
-            f"amd_{kind}_q50": np.nan,
-            f"amd_{kind}_q84": np.nan,
+            f"amdk_{kind}_mc": np.nan,
+            f"amdk_{kind}_q16": np.nan,
+            f"amdk_{kind}_q50": np.nan,
+            f"amdk_{kind}_q84": np.nan,
         }
 
         return pd.Series(out)
 
-    # Compute the amd
-    amd = compute_amd(mass_mc, eccen_mc, di_mc, sma_mc)
+    # Compute the amdk
+    amdk = compute_amdk(mass_mc, eccen_mc, di_mc, sma_mc)
 
     if namd:
         out = {
-            f"amd_{kind}_mc": amd,
+            f"amdk_{kind}_mc": amdk,
             f"mass_{kind}_mc": mass_mc,
             f"sqrt_sma_{kind}_mc": np.sqrt(sma_mc),
         }
 
         return pd.Series(out)
 
-    amd = amd.compressed()
-    amd_p = np.percentile(amd, [16, 50, 84])
+    amdk_p = np.percentile(amdk.compressed(), [16, 50, 84])
 
     out = {
-        f"amd_{kind}_mc": amd if full else np.nan,
-        f"amd_{kind}_q16": amd_p[0],
-        f"amd_{kind}_q50": amd_p[1],
-        f"amd_{kind}_q84": amd_p[2],
+        f"amdk_{kind}_mc": amdk if full else np.nan,
+        f"amdk_{kind}_q16": amdk_p[0],
+        f"amdk_{kind}_q50": amdk_p[1],
+        f"amdk_{kind}_q84": amdk_p[2],
     }
 
     return pd.Series(out)
 
 
 def solve_namd_mc(host, kind, Npt, threshold, full=False):
-    retval = host.apply(solve_amd_mc, args=(kind, Npt, threshold, True), axis=1)
-    amd = retval[f"amd_{kind}_mc"]
+    retval = host.apply(solve_amdk_mc, args=(kind, Npt, threshold, True), axis=1)
+    amdk = retval[f"amdk_{kind}_mc"]
     mass = retval[f"mass_{kind}_mc"]
     sqrt_sma = retval[f"sqrt_sma_{kind}_mc"]
 
-    namd = compute_namd(amd, mass, sqrt_sma)
+    namd = compute_namd(amdk, mass, sqrt_sma)
     namd = namd.compressed()
 
     if len(namd) < threshold:
