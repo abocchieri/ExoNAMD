@@ -93,7 +93,7 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False):
             idx = sy_pnum == m
             n_list.append(idx.sum())
         n_list = np.array(n_list)
-        xoffs = 0.3 * (n_list / n_list.max()) ** 1.5
+        xoffs = 0.3 * n_list / n_list.max()
         for i, m in enumerate(M):
             idx = sy_pnum == m
             sy_pnum[idx] += np.linspace(-xoffs[i], xoffs[i], idx.sum())
