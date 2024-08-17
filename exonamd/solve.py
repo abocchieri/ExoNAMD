@@ -247,8 +247,8 @@ def solve_amdk_mc(row, kind, Npt, threshold, namd=False, full=False):
     if namd:
         out = {
             f"amdk_{kind}_mc": amdk,
-            f"mass_{kind}_mc": mass_mc,
-            f"sqrt_sma_{kind}_mc": np.sqrt(sma_mc),
+            f"mass_mc": mass_mc,
+            f"sqrt_sma_mc": np.sqrt(sma_mc),
         }
 
         return pd.Series(out)
@@ -268,8 +268,8 @@ def solve_amdk_mc(row, kind, Npt, threshold, namd=False, full=False):
 def solve_namd_mc(host, kind, Npt, threshold, full=False):
     retval = host.apply(solve_amdk_mc, args=(kind, Npt, threshold, True), axis=1)
     amdk = retval[f"amdk_{kind}_mc"]
-    mass = retval[f"mass_{kind}_mc"]
-    sqrt_sma = retval[f"sqrt_sma_{kind}_mc"]
+    mass = retval[f"mass_mc"]
+    sqrt_sma = retval[f"sqrt_sma_mc"]
 
     namd = compute_namd(amdk, mass, sqrt_sma)
     namd = namd.compressed()
