@@ -426,6 +426,15 @@ def update_planet(row, aliases):
     return planet
 
 
-def groupby_apply_merge(df, groupby, func, *args, **kwargs):
+def groupby_apply_merge(df, groupby, func, *args, allow_overwrite=False, **kwargs):
     retval = df.groupby(groupby).apply(func, *args, **kwargs)
+    
+    if allow_overwrite:
+        # Identify columns that would cause a conflict during the merge
+        overlapping_columns = retval.columns.intersection(df.columns)
+        
+        # Drop those columns from the original dataframe
+        df = df.drop(columns=overlapping_columns)
+    
+    # Perform the merge
     return df.merge(retval, left_on=groupby, right_index=True)
