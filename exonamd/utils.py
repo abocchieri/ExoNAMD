@@ -406,9 +406,8 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
 
 def update_host(row, aliases):
     host = row["hostname"]
-    host_aliases = aliases[host]["host_aliases"]
-    for key in aliases.keys():
-        if host in host_aliases:
+    for key, item in aliases.items():
+        if host in item["host_aliases"]:
             return key
     return host
 
