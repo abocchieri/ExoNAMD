@@ -2,8 +2,7 @@ import numpy as np
 import astropy.constants as cc
 import astropy.units as u
 import pandas as pd
-
-# import modin.pandas as pd
+from loguru import logger
 
 from exonamd.core import compute_amdk
 from exonamd.core import compute_namd
@@ -125,15 +124,15 @@ def solve_values(row):
     solve_order = np.argsort([a_rs_, rprs_, a_period_])
     for i in solve_order:
         if i == 0:
-            # Solve semi-major axis -- stellar radius system of equations.
+            logger.trace("Solving semi-major axis -- stellar radius system of equations.")
             solution = solve_a_rs(sma, rstar, ars)
             sma, rstar, ars = solution
         elif i == 1:
-            # Solve planet radius -- stellar radius system of equations.
+            logger.trace("Solving planet radius -- stellar radius system of equations.")
             solution = solve_rprs(rplanet, rstar, rprs)
             rplanet, rstar, rprs = solution
         elif i == 2:
-            # Solve period-sma-mstar system of equations.
+            logger.trace("Solving period-sma-mstar system of equations.")
             solution = solve_a_period(period, sma, mstar)
             period, sma, mstar = solution
 

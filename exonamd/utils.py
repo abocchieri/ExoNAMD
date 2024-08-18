@@ -7,9 +7,7 @@ import numpy as np
 import requests
 import warnings
 from astroquery.simbad import Simbad as simbad
-from astropy import constants as cc
-from astropy import units as u
-from pathlib import Path
+from loguru import logger
 
 
 ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -157,18 +155,18 @@ def fetch_nea_aliases(targets):
             responses[i] = r.json()
             fetch_status[i] = 0
         fetched = np.sum(fetch_status <= 0)
-        print(f"Fetched {fetched}/{ntargets} entries on try {n_attempts}")
+        logger.info(f"Fetched {fetched}/{ntargets} entries on try {n_attempts}")
 
     host_aliases_list = []
     planet_aliases_list = []
     for i, resp in enumerate(responses):
         if resp == {}:
-            print(f"NEA alias fetching failed for '{targets[i]}'")
+            logger.warning(f"NEA alias fetching failed for '{targets[i]}'")
             host_aliases_list.append({})
             planet_aliases_list.append({})
             continue
         if resp["manifest"]["lookup_status"] == "System Not Found":
-            print(f"NEA alias not found for '{targets[i]}'")
+            logger.warning(f"NEA alias not found for '{targets[i]}'")
             host_aliases_list.append({})
             planet_aliases_list.append({})
             continue
@@ -240,7 +238,7 @@ def fetch_simbad_aliases(target, verbose=True):
         simbad_info = simbad.query_object(target)
     if simbad_info is None:
         if verbose:
-            print(f"no Simbad entry for target {repr(target)}")
+            logger.warning(f"no Simbad entry for target {repr(target)}")
         return host_alias, kmag
 
     object_type = simbad_info["OTYPE"].value.data[0]
@@ -257,7 +255,7 @@ def fetch_simbad_aliases(target, verbose=True):
         simbad_info = simbad.query_object(host)
         if simbad_info is None:
             if verbose:
-                print(f"Simbad host {repr(host)} not found")
+                logger.warning(f"Simbad host {repr(host)} not found")
             return host_alias, kmag
 
     host_info = simbad_info["IDS"].value.data[0]
@@ -307,6 +305,9 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
     >>> output_file = f'{ROOT}data/nea_aliases.pickle'
     >>> aliases = cat.fetch_aliases(hosts, output_file)
     """
+
+    logger.info("Fetching aliases for host stars")
+
     if known_aliases is None:
         known_aliases = {}
 
@@ -408,6 +409,8 @@ def update_host(row, aliases):
     host = row["hostname"]
     for key, item in aliases.items():
         if host in item["host_aliases"]:
+            if host != key:
+                logger.debug(f"Updating host {host} to {key}")
             return key
     return host
 
@@ -419,8 +422,10 @@ def update_planet(row, aliases):
         if planet in planet_aliases.keys():
             name = planet_aliases[planet]
             if name[: len(key)] != key:
+                logger.debug(f"Updating planet {planet} to {key + name[-2:]}")
                 return key + name[-2:]
             elif planet != name:
+                logger.debug(f"Updating planet {planet} to {name}")
                 return name
     return planet
 

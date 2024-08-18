@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import swifter
 import warnings
+from loguru import logger
 
 from exonamd.catalog import download_nasa_confirmed_planets
 from exonamd.utils import ROOT
@@ -55,7 +56,7 @@ def create_db(from_scratch=True):
 
     name_ok = df.groupby("hostname")["pl_name"].apply(check_name)
     for hostname in name_ok[~name_ok].index:
-        print(f"Inconsistent planet names for {hostname}")
+        logger.error(f"Inconsistent planet names for {hostname}")
 
     # Task 3: compute missing values (if any) from simple equations
     df[

@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 from datetime import datetime
 from datetime import timedelta
+from loguru import logger
 
 from exonamd.utils import ROOT
 
@@ -12,6 +13,8 @@ def download_nasa_confirmed_planets(
     sy_pnum=1,
     from_scratch=False,
 ):
+    
+    logger.info("Downloading NASA Exoplanet Archive confirmed planets")
     if from_scratch:
         df_old = None
         latest = datetime.strptime("1990-01-01", "%Y-%m-%d")
@@ -22,7 +25,7 @@ def download_nasa_confirmed_planets(
         latest = latest - timedelta(days=1)
     latest = latest.strftime("%Y-%m-%d")
 
-    # Define the SQL query to retrieve the required data
+    logger.debug("Defining the SQL query to retrieve the required data")
     query = f"""
     SELECT 
         hostname, 
@@ -59,7 +62,7 @@ def download_nasa_confirmed_planets(
         AND rowupdate > '{latest}'
     """
 
-    # Make the request to the API
+    logger.debug("Making the request to the API")
     url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
     params = {
         "query": query,
@@ -68,11 +71,13 @@ def download_nasa_confirmed_planets(
     response = requests.get(url, params=params)
 
     if response.status_code != 200:
-        print(f"Error: {response.status_code}")
-        raise ValueError("Error in fetching data")
+        logger.error(f"Error: {response.status_code} in fetching data")
+        raise ValueError(f"Error: {response.status_code} in fetching data")
 
     data = response.json()
     df = pd.DataFrame(data)
     df = df.replace({None: np.nan, "": np.nan})
+
+    logger.info("Data fetched")
 
     return df, df_old
