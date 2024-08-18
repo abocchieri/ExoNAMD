@@ -80,62 +80,6 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
     return pd.Series(out)
 
 
-def interp_inclination(row, df):
-    hostname = row["hostname"]
-    incl = row["pl_orbincl"]
-    inclerr1 = row["pl_orbinclerr1"]
-    inclerr2 = row["pl_orbinclerr2"]
-    flag = row["flag"]
-
-    host = df[df["hostname"] == hostname]
-    max_mass = host["pl_bmasse"].idxmax()
-    inclnan = host[host["pl_orbincl"].isnull()]
-
-    # if inclination is not nan, check the errors
-    # if they are nan, set them to 0
-    if not np.isnan(incl):
-        if np.isnan(inclerr1):
-            inclerr1 = 0.0
-            flag += "3+"
-        if np.isnan(inclerr2):
-            inclerr2 = 0.0
-            flag += "3-"
-
-    elif len(inclnan) == len(host):
-        # if all planets have inclination nan
-        incl = 90.0
-        inclerr1 = 0.0
-        inclerr2 = 0.0
-        flag += "3+-"
-
-    else:
-        if max_mass in inclnan.index:
-            # if the most massive planet has inclination nan
-            # we go to the next most massive planet
-            inclnotnan = host[host["pl_orbincl"].notnull()]
-            max_mass = inclnotnan["pl_bmasse"].idxmax()
-
-        max_mass = host.loc[
-            max_mass, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
-        ]
-
-        incl = max_mass["pl_orbincl"]
-        inclerr1 = max_mass["pl_orbinclerr1"]
-        inclerr1 = inclerr1 if not np.isnan(inclerr1) else 0.0
-        inclerr2 = max_mass["pl_orbinclerr2"]
-        inclerr2 = inclerr2 if not np.isnan(inclerr2) else 0.0
-        flag += "3+-"
-
-    out = {
-        "pl_orbincl": incl,
-        "pl_orbinclerr1": inclerr1,
-        "pl_orbinclerr2": inclerr2,
-        "flag": flag,
-    }
-
-    return pd.Series(out)
-
-
 def interp_sma(row):
     smaerr1 = row["pl_orbsmaxerr1"]
     smaerr2 = row["pl_orbsmaxerr2"]
@@ -158,59 +102,80 @@ def interp_sma(row):
     return pd.Series(out)
 
 
-def interp_trueobliq(row, df):
+def interpolate_angle(row, df, value_type):
     hostname = row["hostname"]
-    obliq = row["pl_trueobliq"]
-    obliqerr1 = row["pl_trueobliqerr1"]
-    obliqerr2 = row["pl_trueobliqerr2"]
-    relincl = row["pl_relincl"]
-    relinclerr1 = row["pl_relinclerr1"]
-    relinclerr2 = row["pl_relinclerr2"]
     flag = row["flag"]
 
+    if value_type == "inclination":
+        value_col = "pl_orbincl"
+        err1_col = "pl_orbinclerr1"
+        err2_col = "pl_orbinclerr2"
+        backup_value = 90.0
+        backup_err1 = 0.0
+        backup_err2 = 0.0
+        flag_suffix = "3"
+    elif value_type == "obliquity":
+        value_col = "pl_trueobliq"
+        err1_col = "pl_trueobliqerr1"
+        err2_col = "pl_trueobliqerr2"
+        backup_value = row["pl_relincl"]
+        backup_err1 = row["pl_relinclerr1"]
+        backup_err2 = row["pl_relinclerr2"]
+        flag_suffix = "5"
+    else:
+        raise ValueError("Invalid value_type provided")
+    
+    value = row[value_col]
+    err1 = row[err1_col]
+    err2 = row[err2_col]
+
     host = df[df["hostname"] == hostname]
-    max_mass = host["pl_bmasse"].idxmax()
-    obliqnan = host[host["pl_trueobliq"].isnull()]
+    max_mass_idx = host["pl_bmasse"].idxmax()
+    valuenan = host[host[value_col].isnull()]
 
-    # if obliquity is not nan, check the errors
+    # if value is not nan, check the errors
     # if they are nan, set them to 0
-    if not np.isnan(obliq):
-        if np.isnan(obliqerr1):
-            obliqerr1 = 0.0
-            flag += "5+"
-        if np.isnan(obliqerr2):
-            obliqerr2 = 0.0
-            flag += "5-"
+    if not np.isnan(value):
+        if np.isnan(err1):
+            err1 = 0.0
+            flag += f"{flag_suffix}+"
+        if np.isnan(err2):
+            err2 = 0.0
+            flag += f"{flag_suffix}-"
 
-    elif len(obliqnan) == len(host):
-        # if all planets have obliquity nan
-        obliq = relincl
-        obliqerr1 = relinclerr1
-        obliqerr2 = relinclerr2
-        flag += "5+-"
+    elif len(valuenan) == len(host):
+        # if all planets have value nan
+        value = backup_value
+        err1 = backup_err1
+        err2 = backup_err2
+        flag += f"{flag_suffix}+-"
 
     else:
-        if max_mass in obliqnan.index:
-            # if the most massive planet has obliquity nan
+        if max_mass_idx in valuenan.index:
+            # if the most massive planet has value nan
             # we go to the next most massive planet
-            obliqnotnan = host[host["pl_trueobliq"].notnull()]
-            max_mass = obliqnotnan["pl_bmasse"].idxmax()
+            nonan_values = host[host[value_col].notnull()]
+            max_mass_idx = nonan_values["pl_bmasse"].idxmax()
 
-        max_mass = host.loc[
-            max_mass, ["pl_trueobliq", "pl_trueobliqerr1", "pl_trueobliqerr2"]
-        ]
-        obliq = max_mass["pl_trueobliq"]
-        obliqerr1 = max_mass["pl_trueobliqerr1"]
-        obliqerr1 = obliqerr1 if not np.isnan(obliqerr1) else 0.0
-        obliqerr2 = max_mass["pl_trueobliqerr2"]
-        obliqerr2 = obliqerr2 if not np.isnan(obliqerr2) else 0.0
-        flag += "5+-"
+        max_mass = host.loc[max_mass_idx, [value_col, err1_col, err2_col]]
+        value = max_mass[value_col]
+        err1 = max_mass[err1_col] if not np.isnan(max_mass[err1_col]) else 0.0
+        err2 = max_mass[err2_col] if not np.isnan(max_mass[err2_col]) else 0.0
+        flag += f"{flag_suffix}+-"
 
     out = {
-        "pl_trueobliq": obliq,
-        "pl_trueobliqerr1": obliqerr1,
-        "pl_trueobliqerr2": obliqerr2,
+        value_col: value,
+        err1_col: err1,
+        err2_col: err2,
         "flag": flag,
     }
 
     return pd.Series(out)
+
+
+def interp_inclination(row, df):
+    return interpolate_angle(row, df, "inclination")
+
+
+def interp_trueobliq(row, df):
+    return interpolate_angle(row, df, "obliquity")
