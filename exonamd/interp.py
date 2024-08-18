@@ -122,7 +122,7 @@ def interpolate_angle(row, df, value_type):
         flag_suffix = "5"
     else:
         raise ValueError("Invalid value_type provided")
-    
+
     value = row[value_col]
     err1 = row[err1_col]
     err2 = row[err2_col]
