@@ -137,7 +137,17 @@ def solve_values(row):
             solution = solve_a_period(period, sma, mstar)
             period, sma, mstar = solution
 
-    return pd.Series([sma, ars, rstar, rplanet, rprs, period, mstar])
+    out = {
+        "pl_orbsmax": sma,
+        "pl_ratdor": ars,
+        "st_rad": rstar,
+        "pl_rade": rplanet,
+        "pl_ratror": rprs,
+        "pl_orbper": period,
+        "st_mass": mstar,
+    }
+
+    return pd.Series(out)
 
 
 def solve_relincl(row, df):
@@ -149,23 +159,27 @@ def solve_relincl(row, df):
     inclerr2 = row["pl_orbinclerr2"]
 
     host = df[df["hostname"] == hostname]
-    mass_max = host["pl_bmasse"].idxmax()
-    max_mass_data = host.loc[
-        mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
-    ]
+    max_mass = host["pl_bmasse"].idxmax()
+    max_mass = host.loc[max_mass, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]]
 
-    relincl = max_mass_data["pl_orbincl"] - incl
-    relinclerr1 = np.sqrt(inclerr1**2 + max_mass_data["pl_orbinclerr1"] ** 2)
-    relinclerr2 = -np.sqrt(inclerr2**2 + max_mass_data["pl_orbinclerr2"] ** 2)
+    relincl = max_mass["pl_orbincl"] - incl
+    relinclerr1 = np.sqrt(inclerr1**2 + max_mass["pl_orbinclerr1"] ** 2)
+    relinclerr2 = -np.sqrt(inclerr2**2 + max_mass["pl_orbinclerr2"] ** 2)
 
-    return pd.Series([relincl, relinclerr1, relinclerr2])
+    out = {
+        "pl_relincl": relincl,
+        "pl_relinclerr1": relinclerr1,
+        "pl_relinclerr2": relinclerr2,
+    }
+
+    return pd.Series(out)
 
 
 def solve_amdk(row, kind: str):
     mass = row["pl_bmasse"]
     eccen = row["pl_orbeccen"]
-    di = {"rel": row["pl_relincl"], "abs": row["pl_trueobliq"]}
-    di = di[kind]
+    di_ = {"rel": row["pl_relincl"], "abs": row["pl_trueobliq"]}
+    di = di_[kind]
     sma = row["pl_orbsmax"]
 
     amdk = compute_amdk(mass, eccen, di, sma)
@@ -188,9 +202,7 @@ def solve_namd(host, kind: str):
 
     namd = compute_namd(amdk, mass, sqrt_sma)
 
-    out = {
-        f"namd_{kind}": namd,
-    }
+    out = {f"namd_{kind}": namd}
     return pd.Series(out)
 
 
@@ -202,7 +214,7 @@ def solve_amdk_mc(row, kind, Npt, threshold):
     eccenerr1 = row["pl_orbeccenerr1"]
     eccenerr2 = row["pl_orbeccenerr2"]
 
-    di = {
+    di_ = {
         "rel": row["pl_relincl"],
         "relerr1": row["pl_relinclerr1"],
         "relerr2": row["pl_relinclerr2"],
@@ -211,6 +223,10 @@ def solve_amdk_mc(row, kind, Npt, threshold):
         "abserr2": row["pl_trueobliqerr2"],
     }
 
+    di = di_[kind]
+    dierr1 = di_[f"{kind}err1"]
+    dierr2 = di_[f"{kind}err2"]
+
     sma = row["pl_orbsmax"]
     smaerr1 = row["pl_orbsmaxerr1"]
     smaerr2 = row["pl_orbsmaxerr2"]
@@ -218,9 +234,7 @@ def solve_amdk_mc(row, kind, Npt, threshold):
     # Sample the parameters
     mass_mc = np.random.normal(mass, 0.5 * (masserr1 - masserr2), Npt)
     eccen_mc = np.random.normal(eccen, 0.5 * (eccenerr1 - eccenerr2), Npt)
-    di_mc = np.random.normal(
-        di[kind], 0.5 * (di[f"{kind}err1"] - di[f"{kind}err2"]), Npt
-    )
+    di_mc = np.random.normal(di, 0.5 * (dierr1 - dierr2), Npt)
     sma_mc = np.random.normal(sma, 0.5 * (smaerr1 - smaerr2), Npt)
 
     # Mask unphysical values
@@ -233,13 +247,8 @@ def solve_amdk_mc(row, kind, Npt, threshold):
         & (sma_mc > 0)
     )
 
-    mass_mc = np.ma.MaskedArray(mass_mc, mask=~mask)
-    eccen_mc = np.ma.MaskedArray(eccen_mc, mask=~mask)
-    di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
-    sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
-
     # Check number of valid samples
-    if len(mass_mc.compressed()) < threshold:
+    if np.sum(mask) < threshold:
         out = {
             f"amdk_{kind}_mc": np.nan,
             "mass_mc": np.nan,
@@ -247,6 +256,11 @@ def solve_amdk_mc(row, kind, Npt, threshold):
         }
 
         return pd.Series(out)
+
+    mass_mc = np.ma.MaskedArray(mass_mc, mask=~mask)
+    eccen_mc = np.ma.MaskedArray(eccen_mc, mask=~mask)
+    di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
+    sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
 
     # Compute the amdk
     amdk = compute_amdk(mass_mc, eccen_mc, di_mc, sma_mc)

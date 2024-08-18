@@ -28,7 +28,14 @@ def interp_eccentricity(row):
         eccerr2 = 0.0
         flag += "1-"
 
-    return pd.Series([ecc, eccerr1, eccerr2, flag])
+    out = {
+        "pl_orbeccen": ecc,
+        "pl_orbeccenerr1": eccerr1,
+        "pl_orbeccenerr2": eccerr2,
+        "flag": flag,
+    }
+
+    return pd.Series(out)
 
 
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
@@ -63,7 +70,14 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
         masserr2 = 0.0
         flag += "2-"
 
-    return pd.Series([mass, masserr1, masserr2, flag])
+    out = {
+        "pl_bmasse": mass,
+        "pl_bmasseerr1": masserr1,
+        "pl_bmasseerr2": masserr2,
+        "flag": flag,
+    }
+
+    return pd.Series(out)
 
 
 def interp_inclination(row, df):
@@ -74,7 +88,7 @@ def interp_inclination(row, df):
     flag = row["flag"]
 
     host = df[df["hostname"] == hostname]
-    mass_max = host["pl_bmasse"].idxmax()
+    max_mass = host["pl_bmasse"].idxmax()
     inclnan = host[host["pl_orbincl"].isnull()]
 
     # if inclination is not nan, check the errors
@@ -88,42 +102,38 @@ def interp_inclination(row, df):
             flag += "3-"
 
     elif len(inclnan) == len(host):
-        # i.e., all planets have inclination nan
+        # if all planets have inclination nan
         incl = 90.0
         inclerr1 = 0.0
         inclerr2 = 0.0
         flag += "3+-"
 
-    elif mass_max in inclnan.index:
-        # i.e., the most massive planet has inclination nan
-        # here we set the inclination to the next most massive planet
-        inclnotnan = host[host["pl_orbincl"].notnull()]
-        next_mass_max = inclnotnan["pl_bmasse"].idxmax()
-        next_mass_max_data = host.loc[
-            next_mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
-        ]
-
-        incl = next_mass_max_data["pl_orbincl"]
-        inclerr1 = next_mass_max_data["pl_orbinclerr1"]
-        inclerr1 = inclerr1 if not np.isnan(inclerr1) else 0.0
-        inclerr2 = next_mass_max_data["pl_orbinclerr2"]
-        inclerr2 = inclerr2 if not np.isnan(inclerr2) else 0.0
-        flag += "3+-"
-
     else:
-        # i.e., the most massive planet reports inclination
-        mass_max_data = host.loc[
-            mass_max, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
+        if max_mass in inclnan.index:
+            # if the most massive planet has inclination nan
+            # we go to the next most massive planet
+            inclnotnan = host[host["pl_orbincl"].notnull()]
+            max_mass = inclnotnan["pl_bmasse"].idxmax()
+
+        max_mass = host.loc[
+            max_mass, ["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"]
         ]
 
-        incl = mass_max_data["pl_orbincl"]
-        inclerr1 = mass_max_data["pl_orbinclerr1"]
+        incl = max_mass["pl_orbincl"]
+        inclerr1 = max_mass["pl_orbinclerr1"]
         inclerr1 = inclerr1 if not np.isnan(inclerr1) else 0.0
-        inclerr2 = mass_max_data["pl_orbinclerr2"]
+        inclerr2 = max_mass["pl_orbinclerr2"]
         inclerr2 = inclerr2 if not np.isnan(inclerr2) else 0.0
         flag += "3+-"
 
-    return pd.Series([incl, inclerr1, inclerr2, flag])
+    out = {
+        "pl_orbincl": incl,
+        "pl_orbinclerr1": inclerr1,
+        "pl_orbinclerr2": inclerr2,
+        "flag": flag,
+    }
+
+    return pd.Series(out)
 
 
 def interp_sma(row):
@@ -139,7 +149,13 @@ def interp_sma(row):
         smaerr2 = 0.0
         flag += "4-"
 
-    return pd.Series([smaerr1, smaerr2, flag])
+    out = {
+        "pl_orbsmaxerr1": smaerr1,
+        "pl_orbsmaxerr2": smaerr2,
+        "flag": flag,
+    }
+
+    return pd.Series(out)
 
 
 def interp_trueobliq(row, df):
@@ -153,10 +169,10 @@ def interp_trueobliq(row, df):
     flag = row["flag"]
 
     host = df[df["hostname"] == hostname]
-    mass_max = host["pl_bmasse"].idxmax()
+    max_mass = host["pl_bmasse"].idxmax()
     obliqnan = host[host["pl_trueobliq"].isnull()]
 
-    # if obliq is not nan, check the errors
+    # if obliquity is not nan, check the errors
     # if they are nan, set them to 0
     if not np.isnan(obliq):
         if np.isnan(obliqerr1):
@@ -167,38 +183,34 @@ def interp_trueobliq(row, df):
             flag += "5-"
 
     elif len(obliqnan) == len(host):
-        # i.e., all planets have obliquity nan
+        # if all planets have obliquity nan
         obliq = relincl
         obliqerr1 = relinclerr1
         obliqerr2 = relinclerr2
         flag += "5+-"
 
-    elif mass_max in obliqnan.index:
-        # i.e., the most massive planet has obliquity nan
-        # here we set the obliquity to the next most massive planet
-        obliqnotnan = host[host["pl_trueobliq"].notnull()]
-        next_max_mass = obliqnotnan["pl_bmasse"].idxmax()
-        next_max_mass_data = host.loc[
-            next_max_mass, ["pl_trueobliq", "pl_trueobliqerr1", "pl_trueobliqerr2"]
-        ]
-
-        obliq = next_max_mass_data["pl_trueobliq"]
-        obliqerr1 = next_max_mass_data["pl_trueobliqerr1"]
-        obliqerr1 = obliqerr1 if not np.isnan(obliqerr1) else 0.0
-        obliqerr2 = next_max_mass_data["pl_trueobliqerr2"]
-        obliqerr2 = obliqerr2 if not np.isnan(obliqerr2) else 0.0
-        flag += "5+-"
-
     else:
-        # i.e., the most massive planet reports obliquity
-        max_mass_data = host.loc[
-            mass_max, ["pl_trueobliq", "pl_trueobliqerr1", "pl_trueobliqerr2"]
+        if max_mass in obliqnan.index:
+            # if the most massive planet has obliquity nan
+            # we go to the next most massive planet
+            obliqnotnan = host[host["pl_trueobliq"].notnull()]
+            max_mass = obliqnotnan["pl_bmasse"].idxmax()
+
+        max_mass = host.loc[
+            max_mass, ["pl_trueobliq", "pl_trueobliqerr1", "pl_trueobliqerr2"]
         ]
-        obliq = max_mass_data["pl_trueobliq"]
-        obliqerr1 = max_mass_data["pl_trueobliqerr1"]
+        obliq = max_mass["pl_trueobliq"]
+        obliqerr1 = max_mass["pl_trueobliqerr1"]
         obliqerr1 = obliqerr1 if not np.isnan(obliqerr1) else 0.0
-        obliqerr2 = max_mass_data["pl_trueobliqerr2"]
+        obliqerr2 = max_mass["pl_trueobliqerr2"]
         obliqerr2 = obliqerr2 if not np.isnan(obliqerr2) else 0.0
         flag += "5+-"
 
-    return pd.Series([obliq, obliqerr1, obliqerr2, flag])
+    out = {
+        "pl_trueobliq": obliq,
+        "pl_trueobliqerr1": obliqerr1,
+        "pl_trueobliqerr2": obliqerr2,
+        "flag": flag,
+    }
+
+    return pd.Series(out)

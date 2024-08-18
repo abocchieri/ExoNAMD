@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def simple_plot(
-    data,
+    df,
     kind,
     title="",
     which="namd",
@@ -11,10 +11,10 @@ def simple_plot(
     scale="linear",
     bins=50,
 ):
-    samples = data[f"{which}_{kind}_mc"]
-    q50 = data[f"{which}_{kind}_q50"]
-    q16 = data[f"{which}_{kind}_q16"]
-    q84 = data[f"{which}_{kind}_q84"]
+    samples = df[f"{which}_{kind}_mc"]
+    q50 = df[f"{which}_{kind}_q50"]
+    q16 = df[f"{which}_{kind}_q16"]
+    q84 = df[f"{which}_{kind}_q84"]
 
     xlabel = rf"{which.upper()}$_{kind[0].upper()}$"
 
