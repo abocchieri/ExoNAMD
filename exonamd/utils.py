@@ -437,3 +437,9 @@ def groupby_apply_merge(df, groupby, func, *args, allow_overwrite=False, **kwarg
 
     # Perform the merge
     return df.merge(retval, left_on=groupby, right_index=True)
+
+
+def check_name(names):
+    if len(set(name[:3] for name in names)) > 1:
+        return False
+    return True
