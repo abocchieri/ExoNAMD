@@ -6,9 +6,6 @@ from loguru import logger
 from exonamd.utils import get_value
 
 
-rmr = RMRelation()
-
-
 @logger.catch
 def interp_eccentricity(row):
 
@@ -44,6 +41,8 @@ def interp_eccentricity(row):
 
 @logger.catch
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
+
+    rmr = RMRelation()
 
     mass = get_value(row["pl_bmasse"])
     masserr1 = get_value(row["pl_bmasseerr1"])
