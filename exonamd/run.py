@@ -369,7 +369,6 @@ def plot_sample_namd(df: pd.DataFrame, title: str):
     pop_plot(
         df=df.groupby("hostname").apply(
             lambda g: g.select_dtypes(exclude=["object"]).mean(),
-            include_groups=False,
         ),
         kind="rel",
         title=title,
