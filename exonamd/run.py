@@ -1,4 +1,5 @@
 import os
+import pickle
 import numpy as np
 import pandas as pd
 import swifter
@@ -52,12 +53,26 @@ __all__ = [
 def create_db(from_scratch=True):
     # Task 1: get the data
     df, df_old = download_nasa_confirmed_planets(
-        sy_pnum=1,
+        min_sy_pnum=1,
         from_scratch=from_scratch,
     )
 
     # Task 2: deal with the aliases
-    aliases = fetch_aliases(df["hostname"].unique())
+    try:
+        with open(os.path.join(ROOT, "data", "aliases.pkl"), "rb") as f:
+            aliases = pickle.load(f)
+        logger.info("Aliases file loaded.")
+    except FileNotFoundError:
+        aliases = {}
+        logger.warning("No aliases file found. Starting from scratch.")
+
+    out_path = os.path.join(ROOT, "data", "aliases.pkl")
+    aliases = fetch_aliases(
+        hosts=df["hostname"].unique(),
+        output_file=out_path,
+        known_aliases=aliases,
+    )
+    logger.info("Aliases file updated.")
 
     logger.info("Updating host and planet names")
     df["hostname"] = df.swifter.apply(update_host, args=(aliases,), axis=1)

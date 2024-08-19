@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "exonamd"
-version = "0.0.19.dev5"
+version = "0.0.20.dev1"
 authors = [
     {name = "Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"},
     {name = "Jiri Zak"},
@@ -25,10 +25,10 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries",
 ]
-requires-python = ">3.8"
+requires-python = ">3.10"
 dependencies = [
-    "numpy>=1.22.2",
-    "matplotlib>=3.5.1",
+    "numpy",
+    "matplotlib",
     "spright",
     "requests",
     "pandas",
