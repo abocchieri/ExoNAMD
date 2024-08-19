@@ -3,21 +3,23 @@ import pandas as pd
 from spright import RMRelation
 from loguru import logger
 
+from exonamd.utils import get_value
+
 
 rmr = RMRelation()
 
 
 @logger.catch
 def interp_eccentricity(row):
-    row = row.applymap(lambda x: x.iloc[0] if isinstance(x, pd.Series) else x)
 
-    ecc = row["pl_orbeccen"]
-    eccerr1 = row["pl_orbeccenerr1"]
-    eccerr2 = row["pl_orbeccenerr2"]
-    flag = row["flag"]
+    ecc = get_value(row["pl_orbeccen"])
+    eccerr1 = get_value(row["pl_orbeccenerr1"])
+    eccerr2 = get_value(row["pl_orbeccenerr2"])
+    flag = get_value(row["flag"])
+    sy_pnum = get_value(row["sy_pnum"])
 
     if np.isnan(ecc):
-        ecc = 0.63 * row["sy_pnum"] ** (-1.02)
+        ecc = 0.63 * sy_pnum ** (-1.02)
         eccerr1 = 0.0
         eccerr2 = 0.0
         flag += "1+-"
@@ -42,15 +44,14 @@ def interp_eccentricity(row):
 
 @logger.catch
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
-    row = row.applymap(lambda x: x.iloc[0] if isinstance(x, pd.Series) else x)
 
-    mass = row["pl_bmasse"]
-    masserr1 = row["pl_bmasseerr1"]
-    masserr2 = row["pl_bmasseerr2"]
-    radius = row["pl_rade"]
-    radiuserr1 = row["pl_radeerr1"]
-    radiuserr2 = row["pl_radeerr2"]
-    flag = row["flag"]
+    mass = get_value(row["pl_bmasse"])
+    masserr1 = get_value(row["pl_bmasseerr1"])
+    masserr2 = get_value(row["pl_bmasseerr2"])
+    radius = get_value(row["pl_rade"])
+    radiuserr1 = get_value(row["pl_radeerr1"])
+    radiuserr2 = get_value(row["pl_radeerr2"])
+    flag = get_value(row["flag"])
 
     if (
         np.isnan(mass)
@@ -87,11 +88,10 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
 
 @logger.catch
 def interp_sma(row):
-    row = row.applymap(lambda x: x.iloc[0] if isinstance(x, pd.Series) else x)
 
-    smaerr1 = row["pl_orbsmaxerr1"]
-    smaerr2 = row["pl_orbsmaxerr2"]
-    flag = row["flag"]
+    smaerr1 = get_value(row["pl_orbsmaxerr1"])
+    smaerr2 = get_value(row["pl_orbsmaxerr2"])
+    flag = get_value(row["flag"])
 
     if np.isnan(smaerr1):
         smaerr1 = 0.0
@@ -111,10 +111,9 @@ def interp_sma(row):
 
 
 def interpolate_angle(row, df, value_type):
-    row = row.applymap(lambda x: x.iloc[0] if isinstance(x, pd.Series) else x)
     
-    hostname = row["hostname"]
-    flag = row["flag"]
+    hostname = get_value(row["hostname"])
+    flag = get_value(row["flag"])
 
     if value_type == "inclination":
         value_col = "pl_orbincl"
@@ -128,16 +127,16 @@ def interpolate_angle(row, df, value_type):
         value_col = "pl_trueobliq"
         err1_col = "pl_trueobliqerr1"
         err2_col = "pl_trueobliqerr2"
-        backup_value = row["pl_relincl"]
-        backup_err1 = row["pl_relinclerr1"]
-        backup_err2 = row["pl_relinclerr2"]
+        backup_value = get_value(row["pl_relincl"])
+        backup_err1 = get_value(row["pl_relinclerr1"])
+        backup_err2 = get_value(row["pl_relinclerr2"])
         flag_suffix = "5"
     else:
         raise ValueError("Invalid value_type provided")
 
-    value = row[value_col]
-    err1 = row[err1_col]
-    err2 = row[err2_col]
+    value = get_value(row[value_col])
+    err1 = get_value(row[err1_col])
+    err2 = get_value(row[err2_col])
 
     host = df[df["hostname"] == hostname]
     max_mass_idx = host["pl_bmasse"].idxmax()

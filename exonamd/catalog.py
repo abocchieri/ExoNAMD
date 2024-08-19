@@ -11,7 +11,7 @@ from exonamd.utils import ROOT
 
 @logger.catch
 def download_nasa_confirmed_planets(
-    sy_pnum=1,
+    min_sy_pnum=1,
     from_scratch=False,
 ):
     logger.info("Downloading NASA Exoplanet Archive confirmed planets")
@@ -58,7 +58,7 @@ def download_nasa_confirmed_planets(
         pl_ratror
     FROM ps
     WHERE
-        sy_pnum > '{sy_pnum}'
+        sy_pnum >= '{min_sy_pnum}'
         AND rowupdate > '{latest}'
     """
 

@@ -4,6 +4,7 @@ import astropy.units as u
 import pandas as pd
 from loguru import logger
 
+from exonamd.utils import get_value
 from exonamd.core import compute_amdk
 from exonamd.core import compute_namd
 
@@ -110,13 +111,13 @@ def solve_a_period(period, sma, mstar):
 
 @logger.catch
 def solve_values(row):
-    sma = row["pl_orbsmax"]
-    ars = row["pl_ratdor"]
-    rstar = row["st_rad"]
-    rplanet = row["pl_rade"]
-    rprs = row["pl_ratror"]
-    period = row["pl_orbper"]
-    mstar = row["st_mass"]
+    sma = get_value(row["pl_orbsmax"])
+    ars = get_value(row["pl_ratdor"])
+    rstar = get_value(row["st_rad"])
+    rplanet = get_value(row["pl_rade"])
+    rprs = get_value(row["pl_ratror"])
+    period = get_value(row["pl_orbper"])
+    mstar = get_value(row["st_mass"])
 
     # Rank groups
     a_rs_ = np.isnan(sma) + np.isnan(ars) + np.isnan(rstar)
@@ -156,10 +157,10 @@ def solve_values(row):
 def solve_relincl(row, df):
     # Computes the inclination w.r.t. the most massive planet in the system
 
-    hostname = row["hostname"]
-    incl = row["pl_orbincl"]
-    inclerr1 = row["pl_orbinclerr1"]
-    inclerr2 = row["pl_orbinclerr2"]
+    hostname = get_value(row["hostname"])
+    incl = get_value(row["pl_orbincl"])
+    inclerr1 = get_value(row["pl_orbinclerr1"])
+    inclerr2 = get_value(row["pl_orbinclerr2"])
 
     host = df[df["hostname"] == hostname]
     max_mass = host["pl_bmasse"].idxmax()
@@ -179,11 +180,11 @@ def solve_relincl(row, df):
 
 
 def solve_amdk(row, kind: str):
-    mass = row["pl_bmasse"]
-    eccen = row["pl_orbeccen"]
-    di_ = {"rel": row["pl_relincl"], "abs": row["pl_trueobliq"]}
+    mass = get_value(row["pl_bmasse"])
+    eccen = get_value(row["pl_orbeccen"])
+    di_ = {"rel": get_value(row["pl_relincl"]), "abs": get_value(row["pl_trueobliq"]),}
     di = di_[kind]
-    sma = row["pl_orbsmax"]
+    sma = get_value(row["pl_orbsmax"])
 
     amdk = compute_amdk(mass, eccen, di, sma)
 
@@ -211,29 +212,29 @@ def solve_namd(host, kind: str):
 
 
 def solve_amdk_mc(row, kind, Npt, threshold):
-    mass = row["pl_bmasse"]
-    masserr1 = row["pl_bmasseerr1"]
-    masserr2 = row["pl_bmasseerr2"]
-    eccen = row["pl_orbeccen"]
-    eccenerr1 = row["pl_orbeccenerr1"]
-    eccenerr2 = row["pl_orbeccenerr2"]
+    mass = get_value(row["pl_bmasse"])
+    masserr1 = get_value(row["pl_bmasseerr1"])
+    masserr2 = get_value(row["pl_bmasseerr2"])
+    eccen = get_value(row["pl_orbeccen"])
+    eccenerr1 = get_value(row["pl_orbeccenerr1"])
+    eccenerr2 = get_value(row["pl_orbeccenerr2"])
 
     di_ = {
-        "rel": row["pl_relincl"],
-        "relerr1": row["pl_relinclerr1"],
-        "relerr2": row["pl_relinclerr2"],
-        "abs": row["pl_trueobliq"],
-        "abserr1": row["pl_trueobliqerr1"],
-        "abserr2": row["pl_trueobliqerr2"],
+        "rel": get_value(row["pl_relincl"]),
+        "relerr1": get_value(row["pl_relinclerr1"]),
+        "relerr2": get_value(row["pl_relinclerr2"]),
+        "abs": get_value(row["pl_trueobliq"]),
+        "abserr1": get_value(row["pl_trueobliqerr1"]),
+        "abserr2": get_value(row["pl_trueobliqerr2"]),
     }
 
     di = di_[kind]
     dierr1 = di_[f"{kind}err1"]
     dierr2 = di_[f"{kind}err2"]
 
-    sma = row["pl_orbsmax"]
-    smaerr1 = row["pl_orbsmaxerr1"]
-    smaerr2 = row["pl_orbsmaxerr2"]
+    sma = get_value(row["pl_orbsmax"])
+    smaerr1 = get_value(row["pl_orbsmaxerr1"])
+    smaerr2 = get_value(row["pl_orbsmaxerr2"])
 
     # Sample the parameters
     mass_mc = np.random.normal(mass, 0.5 * (masserr1 - masserr2), Npt)

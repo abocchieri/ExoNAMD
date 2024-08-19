@@ -308,7 +308,7 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
     >>> aliases = cat.fetch_aliases(hosts, output_file)
     """
 
-    logger.info("Fetching aliases for host stars")
+    logger.info("Fetching aliases for host stars and their planets")
 
     if known_aliases is None:
         known_aliases = {}
@@ -401,17 +401,17 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
             aliases[host] = known_aliases[host]
 
     if output_file is not None:
+        logger.info(f"Saving aliases to pickle")
         with open(output_file, "wb") as handle:
             pickle.dump(aliases, handle, protocol=4)
+        logger.info(f"Aliases saved to {output_file}")
 
     return aliases
 
 
 @logger.catch
 def update_host(row, aliases):
-    host = row["hostname"]
-    if isinstance(host, pd.Series):
-        host = host.iloc[0]
+    host = get_value(row["hostname"])
     for key, item in aliases.items():
         if host in item["host_aliases"]:
             if host != key:
@@ -422,9 +422,7 @@ def update_host(row, aliases):
 
 @logger.catch
 def update_planet(row, aliases):
-    planet = row["pl_name"]
-    if isinstance(planet, pd.Series):
-        planet = planet.iloc[0]
+    planet = get_value(row["pl_name"])
     for key, item in aliases.items():
         planet_aliases = item["planet_aliases"]
         if planet in planet_aliases.keys():
@@ -458,3 +456,8 @@ def check_name(names):
     if len(set(name[:3] for name in names)) > 1:
         return False
     return True
+
+
+@logger.catch
+def get_value(value):
+    return value.iloc[0] if isinstance(value, pd.Series) else value

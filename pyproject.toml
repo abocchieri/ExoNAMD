@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "exonamd"
-version = "0.0.19"
+version = "0.0.19.dev5"
 authors = [
     {name = "Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"},
     {name = "Jiri Zak"},
