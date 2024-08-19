@@ -36,6 +36,7 @@ dependencies = [
     "matplotlib",
     "swifter",
     "loguru",
+    "astroquery",
 ]
 
 [project.readme]
