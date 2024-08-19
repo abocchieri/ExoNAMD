@@ -1,3 +1,3 @@
 import importlib.metadata as metadata
 
-__version__ = release = metadata.version("tigro")
+__version__ = release = metadata.version("exonamd")
