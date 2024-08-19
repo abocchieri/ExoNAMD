@@ -114,7 +114,7 @@ def create_db(from_scratch=True):
 
 def interp_db(df: pd.DataFrame):
     # Task 1: reload database
-    if not df:
+    if df is None:
         logger.info("Reloading the database")
         df = pd.read_csv(os.path.join(ROOT, "data", "exo.csv"))
         logger.info("Database reloaded")
@@ -234,7 +234,7 @@ def interp_db(df: pd.DataFrame):
 
 def calc_namd(df: pd.DataFrame, plot=False, core=True):
     # Task 1: reload database
-    if not df:
+    if df is None:
         logger.info("Reloading the database")
         df = pd.read_csv(os.path.join(ROOT, "data", "exo_interp.csv"))
         logger.info("Database reloaded")
@@ -353,9 +353,9 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
     return df
 
 
-def plot_sample_namd(df: pd.DataFrame):
+def plot_sample_namd(df: pd.DataFrame, title: str):
     # Task 1: reload database
-    if not df:
+    if df is None:
         logger.info("Reloading the database")
         df = pd.read_csv(os.path.join(ROOT, "data", "exo_namd.csv"))
         logger.info("Database reloaded")
@@ -368,7 +368,7 @@ def plot_sample_namd(df: pd.DataFrame):
             include_groups=False,
         ),
         kind="rel",
-        title="Core planets",
+        title=title,
         which="namd",
         yscale="log",
         xoffs=True,
@@ -384,7 +384,7 @@ def plot_host_namd(
     threshold: int = 1000,
 ):
     # Task 1: reload database
-    if not df:
+    if df is None:
         logger.info("Reloading the database")
         df = pd.read_csv(os.path.join(ROOT, "data", "exo_namd.csv"))
         logger.info("Database reloaded")
