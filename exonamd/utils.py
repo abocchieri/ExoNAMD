@@ -400,6 +400,8 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
         if host not in aliases:
             aliases[host] = known_aliases[host]
 
+    logger.info("Aliases fetched.")
+
     if output_file is not None:
         logger.info(f"Saving aliases to pickle")
         with open(output_file, "wb") as handle:

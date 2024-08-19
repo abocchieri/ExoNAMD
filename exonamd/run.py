@@ -1,5 +1,4 @@
 import os
-import pickle
 import numpy as np
 import pandas as pd
 import swifter
@@ -63,7 +62,6 @@ def create_db(from_scratch=True):
         hosts=df["hostname"].unique(),
         output_file=out_path,
     )
-    logger.info("Aliases fetched.")
 
     logger.info("Updating host and planet names")
     df["hostname"] = df.swifter.apply(update_host, args=(aliases,), axis=1)
