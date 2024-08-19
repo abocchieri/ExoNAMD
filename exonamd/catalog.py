@@ -13,7 +13,6 @@ def download_nasa_confirmed_planets(
     sy_pnum=1,
     from_scratch=False,
 ):
-    
     logger.info("Downloading NASA Exoplanet Archive confirmed planets")
     if from_scratch:
         df_old = None

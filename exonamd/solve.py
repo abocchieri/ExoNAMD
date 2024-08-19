@@ -124,7 +124,9 @@ def solve_values(row):
     solve_order = np.argsort([a_rs_, rprs_, a_period_])
     for i in solve_order:
         if i == 0:
-            logger.trace("Solving semi-major axis -- stellar radius system of equations.")
+            logger.trace(
+                "Solving semi-major axis -- stellar radius system of equations."
+            )
             solution = solve_a_rs(sma, rstar, ars)
             sma, rstar, ars = solution
         elif i == 1:
