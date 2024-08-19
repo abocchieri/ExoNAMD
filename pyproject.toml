@@ -9,7 +9,7 @@ authors = [
     {name = "Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"},
     {name = "Jiri Zak"},
 ]
-description = "ExoNAMD is a Python codebase to compute the Normalized Angular Momentum Deficit of planets and exoplanets"
+description = "ExoNAMD is a Python codebase to compute the Normalized Angular Momentum Deficit of planetary systems"
 license = {text = "BSD-3-Clause"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
