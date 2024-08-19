@@ -27,7 +27,7 @@ def solve_a_rs(sma, rstar, ars):
     ars: Float
         sma--rstar ratio.
     """
-    missing = np.isnan(sma) + np.isnan(ars) + np.isnan(rstar)
+    missing = np.sum([np.isnan(sma), np.isnan(ars), np.isnan(rstar)])
     # Know everything or not enough:
     if missing != 1:
         return sma, rstar, ars
