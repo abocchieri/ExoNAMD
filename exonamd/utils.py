@@ -460,6 +460,5 @@ def check_name(names):
     return True
 
 
-@logger.catch
 def get_value(value):
     return value.iloc[0] if isinstance(value, pd.Series) else value
