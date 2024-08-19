@@ -425,4 +425,4 @@ def run(from_scratch=True):
 
     df = calc_namd(df)
 
-    plot_sample_namd(df)
+    plot_sample_namd(df, title="Sample systems")
