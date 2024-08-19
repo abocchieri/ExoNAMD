@@ -4,6 +4,7 @@ import concurrent.futures
 import re
 import pickle
 import numpy as np
+import pandas as pd
 import requests
 import warnings
 from astroquery.simbad import Simbad as simbad
@@ -409,7 +410,7 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
 @logger.catch
 def update_host(row, aliases):
     host = row["hostname"]
-    if not isinstance(host, str):
+    if isinstance(host, pd.Series):
         host = host.iloc[0]
     for key, item in aliases.items():
         if host in item["host_aliases"]:
@@ -422,7 +423,7 @@ def update_host(row, aliases):
 @logger.catch
 def update_planet(row, aliases):
     planet = row["pl_name"]
-    if not isinstance(planet, str):
+    if isinstance(planet, pd.Series):
         planet = planet.iloc[0]
     for key, item in aliases.items():
         planet_aliases = item["planet_aliases"]

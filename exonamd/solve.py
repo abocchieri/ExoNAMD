@@ -27,7 +27,7 @@ def solve_a_rs(sma, rstar, ars):
     ars: Float
         sma--rstar ratio.
     """
-    missing = np.sum([np.isnan(sma), np.isnan(ars), np.isnan(rstar)])
+    missing = np.isnan(sma) + np.isnan(rstar) + np.isnan(ars)
     # Know everything or not enough:
     if missing != 1:
         return sma, rstar, ars
@@ -58,7 +58,7 @@ def solve_rprs(rplanet, rstar, rprs):
     rprs: Float
         Planet--star radius ratio.
     """
-    missing = np.sum([np.isnan(rplanet), np.isnan(rstar), np.isnan(rprs)])
+    missing = np.isnan(rplanet) + np.isnan(rstar) + np.isnan(rprs)
     # Know everything or not enough:
     if missing != 1:
         return rplanet, rstar, rprs
@@ -89,7 +89,7 @@ def solve_a_period(period, sma, mstar):
     mstar: Float
         Stellar mass (m_sun).
     """
-    missing = np.sum([np.isnan(period), np.isnan(sma), np.isnan(mstar)])
+    missing = np.isnan(period) + np.isnan(sma) + np.isnan(mstar)
     # Know everything or not enough:
     if missing != 1:
         return period, sma, mstar
@@ -119,9 +119,9 @@ def solve_values(row):
     mstar = row["st_mass"]
 
     # Rank groups
-    a_rs_ = np.sum([np.isnan(sma), np.isnan(ars), np.isnan(rstar)])
-    rprs_ = np.sum([np.isnan(rplanet), np.isnan(rprs), np.isnan(rstar)])
-    a_period_ = np.sum([np.isnan(period), np.isnan(sma), np.isnan(mstar)])
+    a_rs_ = np.isnan(sma) + np.isnan(ars) + np.isnan(rstar)
+    rprs_ = np.isnan(rplanet) + np.isnan(rprs) + np.isnan(rstar)
+    a_period_ = np.isnan(period) + np.isnan(sma) + np.isnan(mstar)
     solve_order = np.argsort([a_rs_, rprs_, a_period_])
     for i in solve_order:
         if i == 0:
