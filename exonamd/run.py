@@ -52,7 +52,7 @@ __all__ = [
 def create_db(from_scratch=True):
     # Task 1: get the data
     df, df_old = download_nasa_confirmed_planets(
-        min_sy_pnum=1,
+        min_sy_pnum=2,
         from_scratch=from_scratch,
     )
 
