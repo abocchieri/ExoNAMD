@@ -423,6 +423,6 @@ def run(from_scratch=True):
 
     df = interp_db(df)
 
-    df = calc_namd(df)
+    df = calc_namd(df, core=True)
 
     plot_sample_namd(df, title="Sample systems")
