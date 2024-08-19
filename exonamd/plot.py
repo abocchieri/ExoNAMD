@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from loguru import logger
 
 
+@logger.catch
 def simple_plot(
     df,
     kind,
@@ -48,6 +50,7 @@ def simple_plot(
     plt.show()
 
 
+@logger.catch
 def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False):
     # Plot the values vs multiplicity and color by their relative uncertainty
 

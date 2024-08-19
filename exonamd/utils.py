@@ -267,6 +267,7 @@ def fetch_simbad_aliases(target, verbose=True):
     return host_alias, kmag
 
 
+@logger.catch
 def fetch_aliases(hosts, output_file=None, known_aliases=None):
     """
     Fetch aliases from the NEA and Simbad databases for a list
@@ -405,6 +406,7 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
     return aliases
 
 
+@logger.catch
 def update_host(row, aliases):
     host = row["hostname"]
     for key, item in aliases.items():
@@ -415,6 +417,7 @@ def update_host(row, aliases):
     return host
 
 
+@logger.catch
 def update_planet(row, aliases):
     planet = row["pl_name"]
     for key, item in aliases.items():
@@ -430,6 +433,7 @@ def update_planet(row, aliases):
     return planet
 
 
+@logger.catch
 def groupby_apply_merge(df, groupby, func, *args, allow_overwrite=False, **kwargs):
     retval = df.groupby(groupby).apply(func, *args, **kwargs)
 
@@ -444,6 +448,7 @@ def groupby_apply_merge(df, groupby, func, *args, allow_overwrite=False, **kwarg
     return df.merge(retval, left_on=groupby, right_index=True)
 
 
+@logger.catch
 def check_name(names):
     if len(set(name[:3] for name in names)) > 1:
         return False

@@ -9,6 +9,7 @@ from loguru import logger
 from exonamd.utils import ROOT
 
 
+@logger.catch
 def download_nasa_confirmed_planets(
     sy_pnum=1,
     from_scratch=False,
@@ -62,7 +63,7 @@ def download_nasa_confirmed_planets(
     """
 
     logger.debug("Making the request to the API")
-    url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
+    url = "https://exoplanetarchive.ipac.caltech.edu/TA/sync"
     params = {
         "query": query,
         "format": "json",

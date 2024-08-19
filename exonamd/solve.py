@@ -108,6 +108,7 @@ def solve_a_period(period, sma, mstar):
     return period, sma, mstar
 
 
+@logger.catch
 def solve_values(row):
     sma = row["pl_orbsmax"]
     ars = row["pl_ratdor"]
@@ -151,6 +152,7 @@ def solve_values(row):
     return pd.Series(out)
 
 
+@logger.catch
 def solve_relincl(row, df):
     # Computes the inclination w.r.t. the most massive planet in the system
 
@@ -194,6 +196,7 @@ def solve_amdk(row, kind: str):
     return pd.Series(out)
 
 
+@logger.catch
 def solve_namd(host, kind: str):
     retval = host.apply(solve_amdk, args=(kind,), axis=1)
 
@@ -275,6 +278,7 @@ def solve_amdk_mc(row, kind, Npt, threshold):
     return pd.Series(out)
 
 
+@logger.catch
 def solve_namd_mc(host, kind, Npt, threshold, full=False):
     retval = host.apply(solve_amdk_mc, args=(kind, Npt, threshold), axis=1)
 

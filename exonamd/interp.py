@@ -1,11 +1,13 @@
 import numpy as np
 import pandas as pd
 from spright import RMRelation
+from loguru import logger
 
 
 rmr = RMRelation()
 
 
+@logger.catch
 def interp_eccentricity(row):
     ecc = row["pl_orbeccen"]
     eccerr1 = row["pl_orbeccenerr1"]
@@ -36,6 +38,7 @@ def interp_eccentricity(row):
     return pd.Series(out)
 
 
+@logger.catch
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
     mass = row["pl_bmasse"]
     masserr1 = row["pl_bmasseerr1"]
@@ -78,6 +81,7 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
     return pd.Series(out)
 
 
+@logger.catch
 def interp_sma(row):
     smaerr1 = row["pl_orbsmaxerr1"]
     smaerr2 = row["pl_orbsmaxerr2"]
@@ -171,9 +175,11 @@ def interpolate_angle(row, df, value_type):
     return pd.Series(out)
 
 
+@logger.catch
 def interp_inclination(row, df):
     return interpolate_angle(row, df, "inclination")
 
 
+@logger.catch
 def interp_trueobliq(row, df):
     return interpolate_angle(row, df, "obliquity")
