@@ -58,21 +58,12 @@ def create_db(from_scratch=True):
     )
 
     # Task 2: deal with the aliases
-    try:
-        with open(os.path.join(ROOT, "data", "aliases.pkl"), "rb") as f:
-            aliases = pickle.load(f)
-        logger.info("Aliases file loaded.")
-    except FileNotFoundError:
-        aliases = {}
-        logger.warning("No aliases file found. Starting from scratch.")
-
     out_path = os.path.join(ROOT, "data", "aliases.pkl")
     aliases = fetch_aliases(
         hosts=df["hostname"].unique(),
         output_file=out_path,
-        known_aliases=aliases,
     )
-    logger.info("Aliases file updated.")
+    logger.info("Aliases fetched.")
 
     logger.info("Updating host and planet names")
     df["hostname"] = df.swifter.apply(update_host, args=(aliases,), axis=1)
@@ -325,8 +316,8 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
         )
 
     # Task 3: compute the NAMD and associated confidence intervals
-    Npt = 200000
-    threshold = 100
+    Npt = 250000
+    threshold = 1000
 
     logger.info("Computing the Monte Carlo relative NAMD")
     df = groupby_apply_merge(
