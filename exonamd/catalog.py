@@ -63,7 +63,7 @@ def download_nasa_confirmed_planets(
     """
 
     logger.debug("Making the request to the API")
-    url = "https://exoplanetarchive.ipac.caltech.edu/TA/sync"
+    url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
     params = {
         "query": query,
         "format": "json",
