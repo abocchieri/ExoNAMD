@@ -409,6 +409,8 @@ def fetch_aliases(hosts, output_file=None, known_aliases=None):
 @logger.catch
 def update_host(row, aliases):
     host = row["hostname"]
+    if not isinstance(host, str):
+        host = host.iloc[0]
     for key, item in aliases.items():
         if host in item["host_aliases"]:
             if host != key:
@@ -420,6 +422,8 @@ def update_host(row, aliases):
 @logger.catch
 def update_planet(row, aliases):
     planet = row["pl_name"]
+    if not isinstance(planet, str):
+        planet = planet.iloc[0]
     for key, item in aliases.items():
         planet_aliases = item["planet_aliases"]
         if planet in planet_aliases.keys():

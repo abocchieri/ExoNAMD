@@ -119,9 +119,9 @@ def solve_values(row):
     mstar = row["st_mass"]
 
     # Rank groups
-    a_rs_ = np.isnan(sma) + np.isnan(ars) + np.isnan(rstar)
-    rprs_ = np.isnan(rplanet) + np.isnan(rprs) + np.isnan(rstar)
-    a_period_ = np.isnan(period) + np.isnan(sma) + np.isnan(mstar)
+    a_rs_ = np.sum([np.isnan(sma), np.isnan(ars), np.isnan(rstar)])
+    rprs_ = np.sum([np.isnan(rplanet), np.isnan(rprs), np.isnan(rstar)])
+    a_period_ = np.sum([np.isnan(period), np.isnan(sma), np.isnan(mstar)])
     solve_order = np.argsort([a_rs_, rprs_, a_period_])
     for i in solve_order:
         if i == 0:
