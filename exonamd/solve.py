@@ -58,7 +58,7 @@ def solve_rprs(rplanet, rstar, rprs):
     rprs: Float
         Planet--star radius ratio.
     """
-    missing = np.isnan(rplanet) + np.isnan(rstar) + np.isnan(rprs)
+    missing = np.sum([np.isnan(rplanet), np.isnan(rstar), np.isnan(rprs)])
     # Know everything or not enough:
     if missing != 1:
         return rplanet, rstar, rprs
@@ -89,7 +89,7 @@ def solve_a_period(period, sma, mstar):
     mstar: Float
         Stellar mass (m_sun).
     """
-    missing = np.isnan(period) + np.isnan(sma) + np.isnan(mstar)
+    missing = np.sum([np.isnan(period), np.isnan(sma), np.isnan(mstar)])
     # Know everything or not enough:
     if missing != 1:
         return period, sma, mstar
