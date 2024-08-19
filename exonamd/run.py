@@ -40,6 +40,15 @@ swifter.set_defaults(
 )
 
 
+__all__ = [
+    "create_db",
+    "interp_db",
+    "calc_namd",
+    "plot_sample_namd",
+    "plot_host_namd",
+]
+
+
 def create_db(from_scratch=True):
     # Task 1: get the data
     df, df_old = download_nasa_confirmed_planets(
