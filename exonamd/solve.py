@@ -182,7 +182,10 @@ def solve_relincl(row, df):
 def solve_amdk(row, kind: str):
     mass = get_value(row["pl_bmasse"])
     eccen = get_value(row["pl_orbeccen"])
-    di_ = {"rel": get_value(row["pl_relincl"]), "abs": get_value(row["pl_trueobliq"]),}
+    di_ = {
+        "rel": get_value(row["pl_relincl"]),
+        "abs": get_value(row["pl_trueobliq"]),
+    }
     di = di_[kind]
     sma = get_value(row["pl_orbsmax"])
 

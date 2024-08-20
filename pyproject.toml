@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "exonamd"
-version = "0.0.25"
+version = "0.0.26"
 authors = [
     {name = "Andrea Bocchieri <andrea.bocchieri@uniroma1.it>"},
     {name = "Jiri Zak"},
@@ -55,6 +55,7 @@ test = [
 ]
 
 [project.scripts]
+exonamd = "exonamd.exonamd:main"
 
 [tool.setuptools]
 zip-safe = true

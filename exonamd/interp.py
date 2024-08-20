@@ -11,7 +11,6 @@ rmr = RMRelation()
 
 @logger.catch
 def interp_eccentricity(row):
-
     ecc = get_value(row["pl_orbeccen"])
     eccerr1 = get_value(row["pl_orbeccenerr1"])
     eccerr2 = get_value(row["pl_orbeccenerr2"])
@@ -44,7 +43,6 @@ def interp_eccentricity(row):
 
 @logger.catch
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
-
     mass = get_value(row["pl_bmasse"])
     masserr1 = get_value(row["pl_bmasseerr1"])
     masserr2 = get_value(row["pl_bmasseerr2"])
@@ -88,7 +86,6 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
 
 @logger.catch
 def interp_sma(row):
-
     smaerr1 = get_value(row["pl_orbsmaxerr1"])
     smaerr2 = get_value(row["pl_orbsmaxerr2"])
     flag = get_value(row["flag"])
@@ -111,7 +108,6 @@ def interp_sma(row):
 
 
 def interpolate_angle(row, df, value_type):
-    
     hostname = get_value(row["hostname"])
     flag = get_value(row["flag"])
 
