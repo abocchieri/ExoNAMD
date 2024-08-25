@@ -32,8 +32,6 @@ dependencies = [
     "spright",
     "requests",
     "pandas",
-    "numpy",
-    "matplotlib",
     "swifter",
     "loguru",
     "astroquery",
