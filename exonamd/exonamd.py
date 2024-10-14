@@ -8,6 +8,24 @@ from exonamd.run import run
 
 
 def main():
+    """
+    Main entry point for the ExoNAMD command line interface.
+
+    This function parses arguments using argparse and runs the `run` function
+    with the appropriate arguments. The arguments are:
+
+    * `-u` or `--update`: Update the exo.csv database.
+    * `-d` or `--debug`: Enable debug mode.
+    * `-l` or `--log`: Enable logging to file.
+
+    If debug mode is not enabled, the logging level is set to INFO and
+    logging to file is disabled. If logging to file is enabled, a log file
+    is created with the current date and time in the format
+    `{__pkg_name__}_{time.strftime('%Y%m%d_%H:%M:%S')}.log`.
+
+    The function logs a message at the `Announce` level when it starts and
+    finishes, and logs the elapsed time at the `INFO` level.
+    """
     import argparse
     import time
 

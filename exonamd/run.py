@@ -21,8 +21,8 @@ from exonamd.interp import interp_trueobliq
 from exonamd.utils import groupby_apply_merge
 from exonamd.solve import solve_namd
 from exonamd.solve import solve_namd_mc
-from exonamd.plot import simple_plot
-from exonamd.plot import pop_plot
+from exonamd.plot import plot_host_namd
+from exonamd.plot import plot_sample_namd
 
 
 warnings.filterwarnings("ignore", category=RuntimeWarning, module="pandas")
@@ -50,6 +50,19 @@ __all__ = [
 
 
 def create_db(from_scratch=True):
+    """
+    Downloads the NASA Exoplanet Archive confirmed planets table, deals with aliases, computes missing values from simple relations, and stores the curated database.
+
+    Parameters
+    ----------
+    from_scratch : bool, optional
+        If True, downloads the entire table. If False, downloads only the rows newer than the latest update date in the current table. Defaults to True.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        The curated database.
+    """
     # Task 1: get the data
     df, df_old = download_nasa_confirmed_planets(
         min_sy_pnum=2,
@@ -117,6 +130,37 @@ def create_db(from_scratch=True):
 
 
 def interp_db(df: pd.DataFrame):
+    """
+    Curates and interpolates missing values in the NASA exoplanet database.
+
+    This function reloads the database, thins it down by using the median of the values for each parameter of each planet, and then interpolates missing values of:
+    - eccentricities
+    - planetary masses
+    - inclinations
+    - semi-major axis uncertainties
+    - true obliquity
+
+    The function then stores the curated+interpolated database in a new file.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The database to be curated and interpolated. If None, the function will reload the database.
+
+    Returns
+    -------
+    pd.DataFrame
+        The curated+interpolated database.
+
+    Raises
+    ------
+    ValueError
+        If there are duplicated rows for a given hostname+planet name pair.
+
+    Notes
+    -----
+    The output database will have the same columns as the input database, with the addition of the "flag" column which indicates whether the value was interpolated or not (flag=0).
+    """
     # Task 1: reload database
     if df is None:
         logger.info("Reloading the database")
@@ -236,7 +280,25 @@ def interp_db(df: pd.DataFrame):
     return df
 
 
-def calc_namd(df: pd.DataFrame, plot=False, core=True):
+def calc_namd(df: pd.DataFrame, plot=False, core=True):    
+    """
+    Compute the NAMD for a given sample of planetary systems.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input database. If None, it will be reloaded from the default location.
+    plot : bool, optional
+        Whether to plot some diagnostic plots. Default is False.
+    core : bool, optional
+        Whether to select only the "core" sample. Default is True.
+
+    Notes
+    -----
+    The output database will have the same columns as the input database, with the addition of the NAMD parameters.
+
+    The "core" sample is defined as the systems with all planets having a flag of either 0, 05+, 05-, or 05+-, i.e. nothing or only the obliquity has been interpolated.
+    """
     # Task 1: reload database
     if df is None:
         logger.info("Reloading the database")
@@ -355,66 +417,6 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
     logger.info(f"Database stored at {out_path}")
 
     return df
-
-
-def plot_sample_namd(df: pd.DataFrame, title: str):
-    # Task 1: reload database
-    if df is None:
-        logger.info("Reloading the database")
-        df = pd.read_csv(os.path.join(ROOT, "data", "exo_namd.csv"))
-        logger.info("Database reloaded")
-
-    # Task 2: plot the sample NAMD
-    logger.info("Plotting the NAMD vs. multiplicity")
-    pop_plot(
-        df=df.groupby("hostname").apply(
-            lambda g: g.select_dtypes(exclude=["object"]).mean(),
-        ),
-        kind="rel",
-        title=title,
-        which="namd",
-        yscale="log",
-        xoffs=True,
-    )
-    logger.info("Plot done")
-
-
-def plot_host_namd(
-    df: pd.DataFrame,
-    hostname: str,
-    which: str,
-    Npt: int = 100000,
-    threshold: int = 1000,
-):
-    # Task 1: reload database
-    if df is None:
-        logger.info("Reloading the database")
-        df = pd.read_csv(os.path.join(ROOT, "data", "exo_namd.csv"))
-        logger.info("Database reloaded")
-
-    # Task 2: sample the NAMD for a given host
-    logger.info(f"Selecting the host: {hostname}")
-    host = df[df["hostname"] == hostname]
-    logger.info("Host selected")
-
-    logger.info("Computing the Monte Carlo NAMD")
-    retval = solve_namd_mc(
-        host=host,
-        kind="f{which}",
-        Npt=Npt,
-        threshold=threshold,
-        full=True,
-    )
-
-    # Task 2: plot the NAMD for a given host
-    simple_plot(
-        df=retval,
-        kind="f{which}",
-        title=hostname,
-        which="namd",
-        scale="log",
-    )
-    logger.info("Plot done")
 
 
 def run(from_scratch=True):

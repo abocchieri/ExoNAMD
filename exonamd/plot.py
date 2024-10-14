@@ -1,6 +1,10 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from loguru import logger
+
+from exonamd.utils import ROOT
+from exonamd.solve import solve_namd_mc
 
 
 @logger.catch
@@ -129,3 +133,101 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False):
     plt.grid(which="both", linestyle="--", alpha=0.5)
 
     plt.show()
+
+
+def plot_host_namd(
+    df: pd.DataFrame,
+    hostname: str,
+    kind: str,
+    Npt: int = 100000,
+    threshold: int = 1000,
+):
+    """
+    Plot the NAMD for a given host.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The NAMD database. If None, the function reloads the database from disk.
+    hostname : str
+        The hostname to plot.
+    kind : str
+        Which type of NAMD to plot. One of 'rel' (relative NAMD) or 'abs' (absolute NAMD).
+    Npt : int
+        Number of Monte Carlo samples.
+    threshold : int
+        Minimum number of valid samples required.
+
+    Returns
+    -------
+    None
+    """
+    # Task 1: reload database
+    if df is None:
+        logger.info("Reloading the database")
+        df = pd.read_csv(os.path.join(ROOT, "data", "exo_namd.csv"))
+        logger.info("Database reloaded")
+
+    # Task 1: sample the NAMD for a given host
+    logger.info(f"Selecting the host: {hostname}")
+    host = df[df["hostname"] == hostname]
+    logger.info("Host selected")
+
+    logger.info("Computing the Monte Carlo relative NAMD")
+    retval = solve_namd_mc(
+        host=host,
+        kind=f"{kind}",
+        Npt=Npt,
+        threshold=threshold,
+        full=True,
+    )
+    logger.info("Values computed")
+
+    # Task 2: plot the NAMD for a given host
+    logger.info("Plotting the relative NAMD distribution")
+    simple_plot(
+        df=retval,
+        kind=f"{kind}",
+        title=hostname,
+        which="namd",
+        scale="log",
+    )
+    logger.info("Plot done")
+
+
+def plot_sample_namd(df: pd.DataFrame, title: str):
+    """
+    Plot the sample NAMD against the multiplicity.
+
+    If df is None, the function reloads the database from disk.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The NAMD database.
+    title : str
+        The title of the plot.
+
+    Returns
+    -------
+    None
+    """
+    # Task 1: reload database
+    if df is None:
+        logger.info("Reloading the database")
+        df = pd.read_csv(os.path.join(ROOT, "data", "exo_namd.csv"))
+        logger.info("Database reloaded")
+
+    # Task 2: plot the sample NAMD
+    logger.info("Plotting the NAMD vs. multiplicity")
+    pop_plot(
+        df=df.groupby("hostname").apply(
+            lambda g: g.select_dtypes(exclude=["object"]).mean(),
+        ),
+        kind="rel",
+        title=title,
+        which="namd",
+        yscale="log",
+        xoffs=True,
+    )
+    logger.info("Plot done")

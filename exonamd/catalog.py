@@ -14,6 +14,23 @@ def download_nasa_confirmed_planets(
     min_sy_pnum=1,
     from_scratch=False,
 ):
+    """
+    Downloads the NASA Exoplanet Archive confirmed planets table.
+
+    Parameters
+    ----------
+    min_sy_pnum : int, optional
+        Minimum number of planets in the system to consider. Defaults to 1.
+    from_scratch : bool, optional
+        If True, downloads the entire table. If False, downloads only the rows newer than the latest update date in the current table. Defaults to False.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        The downloaded table.
+    df_old : pandas.DataFrame
+        The previous table, if from_scratch is False. Otherwise, None.
+    """
     logger.info("Downloading NASA Exoplanet Archive confirmed planets")
     if from_scratch:
         df_old = None

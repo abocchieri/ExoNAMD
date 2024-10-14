@@ -155,8 +155,21 @@ def solve_values(row):
 
 @logger.catch
 def solve_relincl(row, df):
-    # Computes the inclination w.r.t. the most massive planet in the system
+    """
+    Computes the relative inclination of a planet with respect to the most massive planet in the same system.
 
+    Parameters
+    ----------
+    row: pandas.Series
+        A row from the planet table.
+    df: pandas.DataFrame
+        The planet table.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the relative inclination and the associated uncertainties. 
+    """
     hostname = get_value(row["hostname"])
     incl = get_value(row["pl_orbincl"])
     inclerr1 = get_value(row["pl_orbinclerr1"])
@@ -180,6 +193,21 @@ def solve_relincl(row, df):
 
 
 def solve_amdk(row, kind: str):
+    """
+    Wrapper of the function **compute_amdk** to compute the angular momentum deficit (AMD) for a planet (or planets) in a system.
+
+    Parameters
+    ----------
+    row: pandas.Series
+        A row from the planet table.
+    kind: str
+        Which type of AMD to compute. One of 'rel' (relative, using the relative inclination) or 'abs' (absolute, using the obliquity).
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the angular momentum deficit and the associated mass and sqrt of the semi-major axis.
+    """
     mass = get_value(row["pl_bmasse"])
     eccen = get_value(row["pl_orbeccen"])
     di_ = {
@@ -202,6 +230,21 @@ def solve_amdk(row, kind: str):
 
 @logger.catch
 def solve_namd(host, kind: str):
+    """
+    Wrapper of the functions **solve_amdk** and **compute_namd** to compute the normalized angular momentum deficit (NAMD) for a given system.
+
+    Parameters
+    ----------
+    host: pandas.DataFrame
+        A DataFrame containing the planet table.
+    kind: str
+        Which type of NAMD to compute. One of 'rel' (relative, using the relative inclination) or 'abs' (absolute, using the obliquity).
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the normalized angular momentum deficit.
+    """
     retval = host.apply(solve_amdk, args=(kind,), axis=1)
 
     amdk = retval[f"amdk_{kind}"]
@@ -215,6 +258,25 @@ def solve_namd(host, kind: str):
 
 
 def solve_amdk_mc(row, kind, Npt, threshold):
+    """
+    Compute the absolute or relative angular momentum deficit (AMD) for a given planet using a Monte Carlo approach.
+
+    Parameters
+    ----------
+    row: pandas.Series
+        A row from the planet table.
+    kind: str
+        Which type of AMD to compute. One of 'rel' (relative, using the relative inclination) or 'abs' (absolute, using the obliquity).
+    Npt: int
+        Number of Monte Carlo samples.
+    threshold: int
+        Minimum number of valid samples required.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the absolute or relative AMD, the associated mass and sqrt of the semi-major axis.
+    """
     mass = get_value(row["pl_bmasse"])
     masserr1 = get_value(row["pl_bmasseerr1"])
     masserr2 = get_value(row["pl_bmasseerr2"])
@@ -284,6 +346,27 @@ def solve_amdk_mc(row, kind, Npt, threshold):
 
 @logger.catch
 def solve_namd_mc(host, kind, Npt, threshold, full=False):
+    """
+    Wrapper of the functions **solve_amdk_mc** and **compute_namd** to compute the normalized angular momentum deficit (NAMD) for a given system using a Monte Carlo approach.
+
+    Parameters
+    ----------
+    host: pandas.DataFrame
+        A DataFrame containing the system table.
+    kind: str
+        Which type of NAMD to compute. One of 'rel' (relative, using the relative inclination) or 'abs' (absolute, using the obliquity).
+    Npt: int
+        Number of Monte Carlo samples.
+    threshold: int
+        Minimum number of valid samples required.
+    full: bool
+        If True, return the full array of NAMD values. Otherwise, return only the 16th, 50th and 84th percentiles.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the normalized angular momentum deficit results.
+    """
     retval = host.apply(solve_amdk_mc, args=(kind, Npt, threshold), axis=1)
 
     amdk = retval[f"amdk_{kind}_mc"]

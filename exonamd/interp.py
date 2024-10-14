@@ -11,6 +11,22 @@ rmr = RMRelation()
 
 @logger.catch
 def interp_eccentricity(row):
+    """
+    Interpolates missing eccentricity values using the relation found in
+    ...
+
+    Also, sets flags for the interpolation.
+
+    Parameters
+    ----------
+    row: pandas.Series
+        The planet row in the sytem table.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the interpolated eccentricity, the associated uncertainties and flag.
+    """
     ecc = get_value(row["pl_orbeccen"])
     eccerr1 = get_value(row["pl_orbeccenerr1"])
     eccerr2 = get_value(row["pl_orbeccenerr2"])
@@ -43,6 +59,23 @@ def interp_eccentricity(row):
 
 @logger.catch
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
+    """
+    Interpolate missing mass values by using the mass-radius relation implemented in the spright package, which is described in ...
+
+    Parameters
+    ----------
+    row : pandas.Series
+        The planet row in the sytem table.
+    min_radius : float, optional
+        Minimum radius in units of R_earth below which the interpolation is not performed, by default 0.5.
+    max_radius : float, optional
+        Maximum radius in units of R_earth  above which the interpolation is not performed, by default 6.0.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the interpolated mass, the associated uncertainties and flag.
+    """
     mass = get_value(row["pl_bmasse"])
     masserr1 = get_value(row["pl_bmasseerr1"])
     masserr2 = get_value(row["pl_bmasseerr2"])
@@ -86,6 +119,19 @@ def interp_mass(row, min_radius=0.5, max_radius=6.0):
 
 @logger.catch
 def interp_sma(row):
+    """
+    Interpolate missing semi-major axis uncertainties by setting them to zero and adding the flag.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        The planet row in the sytem table.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the interpolated semi-major axis uncertainties and the associated flag.
+    """
     smaerr1 = get_value(row["pl_orbsmaxerr1"])
     smaerr2 = get_value(row["pl_orbsmaxerr2"])
     flag = get_value(row["flag"])
@@ -108,6 +154,23 @@ def interp_sma(row):
 
 
 def interpolate_angle(row, df, value_type):
+    """
+    Interpolate missing values for inclination or obliquity by using the values from the most massive planet in the same system.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        The planet row in the sytem table.
+    df : pandas.DataFrame
+        The system table.
+    value_type : str
+        Either "inclination" or "obliquity".
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the interpolated value, the associated uncertainties and flag.
+    """
     hostname = get_value(row["hostname"])
     flag = get_value(row["flag"])
 
@@ -180,9 +243,39 @@ def interpolate_angle(row, df, value_type):
 
 @logger.catch
 def interp_inclination(row, df):
+    """
+    Wrapper of the function **interpolate_angle** to interpolate inclination by using the values from the most massive planet in the same system.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        The planet row in the sytem table.
+    df : pandas.DataFrame
+        The system table.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the interpolated value, the associated uncertainties and flag.
+    """
     return interpolate_angle(row, df, "inclination")
 
 
 @logger.catch
 def interp_trueobliq(row, df):
+    """
+    Wrapper of the function **interpolate_angle** to interpolate obliquity by using the values from the most massive planet in the same system.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        The planet row in the sytem table.
+    df : pandas.DataFrame
+        The system table.
+
+    Returns
+    -------
+    pandas.Series
+        A pandas Series containing the interpolated value, the associated uncertainties and flag.
+    """
     return interpolate_angle(row, df, "obliquity")
