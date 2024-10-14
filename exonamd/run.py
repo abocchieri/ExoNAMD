@@ -21,7 +21,6 @@ from exonamd.interp import interp_trueobliq
 from exonamd.utils import groupby_apply_merge
 from exonamd.solve import solve_namd
 from exonamd.solve import solve_namd_mc
-from exonamd.plot import plot_host_namd
 from exonamd.plot import plot_sample_namd
 
 
@@ -44,8 +43,6 @@ __all__ = [
     "create_db",
     "interp_db",
     "calc_namd",
-    "plot_sample_namd",
-    "plot_host_namd",
 ]
 
 
