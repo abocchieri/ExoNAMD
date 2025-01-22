@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,6 +18,7 @@ def simple_plot(
     ylabel="Frequency",
     scale="linear",
     bins=50,
+    outpath=None,
 ):
     samples = df[f"{which}_{kind}_mc"]
     q50 = df[f"{which}_{kind}_q50"]
@@ -51,11 +54,15 @@ def simple_plot(
         color=["red", "black", "red"],
         linestyles="dashed",
     )
+    if outpath:
+        Path(outpath).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(outpath, bbox_inches="tight", dpi=300, format="pdf")
+
     plt.show()
 
 
 @logger.catch
-def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False):
+def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False, outpath=None):
     # Plot the values vs multiplicity and color by their relative uncertainty
 
     df = df.sort_values(by="sy_pnum")
@@ -132,6 +139,10 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False):
     plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     plt.grid(which="both", linestyle="--", alpha=0.5)
 
+    if outpath:
+        Path(outpath).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(outpath, bbox_inches="tight", dpi=300, format="pdf")
+
     plt.show()
 
 
@@ -141,6 +152,7 @@ def plot_host_namd(
     kind: str,
     Npt: int = 100000,
     threshold: int = 1000,
+    outpath: str = None,
 ):
     """
     Plot the NAMD for a given host.
@@ -191,6 +203,7 @@ def plot_host_namd(
         title=hostname,
         which="namd",
         scale="log",
+        outpath=outpath,
     )
     logger.info("Plot done")
 
