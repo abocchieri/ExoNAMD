@@ -1,0 +1,5 @@
+hostname,pl_name,default_flag,rowupdate,sy_pnum,st_rad,st_mass,pl_orbper,pl_orbsmax,pl_orbsmaxerr1,pl_orbsmaxerr2,pl_rade,pl_radeerr1,pl_radeerr2,pl_bmasse,pl_bmasseerr1,pl_bmasseerr2,pl_orbeccen,pl_orbeccenerr1,pl_orbeccenerr2,pl_orbincl,pl_orbinclerr1,pl_orbinclerr2,pl_trueobliq,pl_trueobliqerr1,pl_trueobliqerr2,pl_ratdor,pl_ratror
+Kepler-462,Kepler-462 b,1,,2,,1.965,,0.473,0.021,-0.021,5.044005,0.336267,-0.336267,21,1,-11,0.056,0.019,0,89.34,0.05,-0.05,72,3,-3,,
+Kepler-462,Kepler-462 c,1,,2,,1.965,,0.859,0.037,-0.037,4.819827,0.560445,-0.560445,,,0,0.5,0.09,0,90.64,0.06,-0.06,73,11,-5,,
+Kepler-462l,Kepler-462l b,1,,2,,1.965,,0.473,0.021,-0.021,5.044005,0.336267,-0.336267,21,1,-11,0.056,0.019,0,89.34,0.05,-0.05,-32,11,-11,,
+Kepler-462l,Kepler-462l c,1,,2,,1.965,,0.859,0.037,-0.037,4.819827,0.560445,-0.560445,,,0,0.5,0.09,0,90.64,0.06,-0.06,-32,40,-40,,
