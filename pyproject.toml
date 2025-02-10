@@ -54,5 +54,11 @@ swifter = "*"
 loguru = "*"
 astroquery = "*"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "*"
+sphinxcontrib-napoleon = "*"
+sphinxcontrib-jsmath = "*"
+sphinx-rtd-theme = "^3.0.1"
+
 [tool.poetry.scripts]
 exonamd = "exonamd.exonamd:main"
