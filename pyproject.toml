@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "exonamd"
-version = "0.1.1"
+version = "0.1.2"
 description = "ExoNAMD is a Python codebase to compute the Normalized Angular Momentum Deficit of planetary systems."
 license = "BSD-3-Clause"
 authors = [
@@ -55,10 +55,10 @@ loguru = "*"
 astroquery = "*"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "*"
+sphinx = "^7.0"
 sphinxcontrib-napoleon = "*"
 sphinxcontrib-jsmath = "*"
-sphinx-rtd-theme = "^3.0.1"
+sphinx-rtd-theme = "*"
 
 [tool.poetry.scripts]
 exonamd = "exonamd.exonamd:main"

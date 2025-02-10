@@ -1,8 +1,8 @@
 API Reference
-============
+=============
 
 Core Functions
-------------
+--------------
 
 .. automodule:: exonamd.core
    :members:
@@ -10,7 +10,7 @@ Core Functions
    :show-inheritance:
 
 Data Management
--------------
+---------------
 
 .. automodule:: exonamd.catalog
    :members:
@@ -18,7 +18,7 @@ Data Management
    :show-inheritance:
 
 Calculation Tools
----------------
+-----------------
 
 .. automodule:: exonamd.solve
    :members:
@@ -26,7 +26,7 @@ Calculation Tools
    :show-inheritance:
 
 Visualization
------------
+-------------
 
 .. automodule:: exonamd.plot
    :members:
@@ -34,7 +34,7 @@ Visualization
    :show-inheritance:
 
 Main Interface
-------------
+--------------
 
 .. automodule:: exonamd.run
    :members:

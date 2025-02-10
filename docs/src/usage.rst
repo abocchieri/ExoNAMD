@@ -1,8 +1,8 @@
 Usage Guide
-==========
+===========
 
 Basic Usage
-----------
+-----------
 
 The main workflow consists of three steps:
 
@@ -35,7 +35,7 @@ The main workflow consists of three steps:
     df = calc_namd(df, core=True)
 
 Command Line Interface
---------------------
+----------------------
 
 ExoNAMD can also be run from the command line:
 
@@ -54,10 +54,10 @@ ExoNAMD can also be run from the command line:
     exonamd -l
 
 Core Functions
-------------
+--------------
 
 NAMD Calculation
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 The package calculates both relative and absolute NAMD:
 
@@ -65,7 +65,7 @@ The package calculates both relative and absolute NAMD:
 - Absolute NAMD: Uses true obliquity values
 
 Monte Carlo Analysis
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 Uncertainty estimation is performed using Monte Carlo sampling:
 

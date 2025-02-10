@@ -1,56 +1,3 @@
-# import os
-# import sys
-# from datetime import datetime
-# import tomli
-
-# sys.path.insert(0, os.path.abspath("../../"))
-
-# from exonamd.__version__ import __version__
-
-# # Read pyproject.toml
-# with open("../../pyproject.toml", "rb") as f:
-#     pyproject = tomli.load(f)
-
-# # Get authors from pyproject.toml and extract names before the email
-# authors = pyproject["tool"]["poetry"]["authors"]
-# author_names = [author.split("<")[0].strip() for author in authors]
-# author = ", ".join(author_names)
-# copyright = f'2023-{datetime.now().year}, {" and ".join(author_names)}'
-
-# project = "ExoNAMD"
-# release = __version__
-
-# extensions = [
-#     "sphinx.ext.autodoc",
-#     "sphinx.ext.napoleon",
-#     "sphinx.ext.viewcode",
-#     "sphinx.ext.mathjax",
-#     "sphinxcontrib.napoleon",
-#     "sphinxcontrib.jsmath",
-# ]
-
-# templates_path = ["_templates"]
-# exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
-# html_theme = "sphinx_rtd_theme"
-# html_static_path = ["_static"]
-
-# # Update mock imports based on actual dependencies
-# autodoc_mock_imports = [
-#     "numpy",
-#     "matplotlib",
-#     "spright",
-#     "requests",
-#     "pandas",
-#     "swifter",
-#     "loguru",
-#     "astroquery",
-# ]
-
-
-
-
-
 ######
 # Configuration file for the Sphinx documentation builder.
 #
@@ -173,14 +120,14 @@ html_theme_options = {
 
 html_context = {
     "display_github": True,
-    "github_user": "arielmission-space",
-    "github_repo": "PAOS",
+    "github_user": "abocchieri",
+    "github_repo": "ExoNAMD",
     "github_version": "main",
     "conf_py_path": "/docs/source/",
 }
 
 html_static_path = ["_static"]
-html_logo = "_static/paos_logo.svg"
+html_logo = "_static/exonamd_logo.svg"
 
 html_show_sourcelink = False
 
@@ -194,7 +141,7 @@ html_copy_source = False
 html_domain_indices = False
 html_file_suffix = ".html"
 
-htmlhelp_basename = "paos"
+htmlhelp_basename = "exonamd"
 
 html_sidebars = {
     "**": [
@@ -223,7 +170,7 @@ plot_html_show_formats = False
 plot_html_show_source_link = False
 
 
-html_css_files = ["_static/paos.css"]
+html_css_files = ["_static/exonamd.css"]
 
 numfig = True
 
@@ -262,7 +209,7 @@ latex_elements = {
     "tableofcontents": " ",
 }
 
-latex_logo = "_static/paos_logo.png"
+latex_logo = "_static/exonamd_logo.png"
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -270,9 +217,9 @@ latex_logo = "_static/paos_logo.png"
 latex_documents = [
     (
         master_doc,
-        "paos.tex",
-        "PAOS Manual",
-        "Andrea Bocchieri, Lorenzo V. Mugnai, Enzo Pascale",
+        "exonamd.tex",
+        "ExoNAMD Manual",
+        "Andrea Bocchieri and Jiri Zak",
         "manual",
     )
 ]

@@ -1,8 +1,8 @@
 Installation Guide
-================
+==================
 
 Prerequisites
-------------
+-------------
 
 * Python 3.8+
 * numpy
@@ -14,7 +14,7 @@ Prerequisites
 * astroquery
 
 Installing ExoNAMD
-----------------
+------------------
 
 From PyPI
 ^^^^^^^^^
@@ -24,7 +24,7 @@ From PyPI
     pip install exonamd
 
 From Source
-^^^^^^^^^^
+^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -33,7 +33,7 @@ From Source
     pip install -e .
 
 Verifying Installation
---------------------
+----------------------
 
 You can verify the installation by running a simple example:
 

@@ -1,11 +1,11 @@
 Examples and Tutorials
-====================
+======================
 
 Basic Examples
-------------
+--------------
 
 Calculate NAMD for All Systems
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -15,7 +15,7 @@ Calculate NAMD for All Systems
     run(from_scratch=True)
 
 Plot NAMD for a Specific System
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -32,10 +32,10 @@ Plot NAMD for a Specific System
     plot_host_namd(df, "WASP-47", kind="abs")
 
 Advanced Analysis
---------------
+-----------------
 
 Working with Core Sample
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 

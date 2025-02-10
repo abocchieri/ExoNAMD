@@ -1,5 +1,5 @@
 ExoNAMD Documentation
-====================
+=====================
 
 ExoNAMD is a Python package for computing the Normalized Angular Momentum Deficit (NAMD) of planetary systems.
 
@@ -8,7 +8,6 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    installation
    usage
@@ -16,7 +15,7 @@ Contents
    examples
    
 Getting Started
---------------
+---------------
 
 ExoNAMD helps analyze the dynamical state of planetary systems through NAMD calculations.
 To get started, check out the :doc:`installation` guide and the :doc:`usage` documentation.
