@@ -26,11 +26,26 @@ From PyPI
 From Source
 ^^^^^^^^^^^
 
+Using Pip:
+
 .. code-block:: bash
 
     git clone https://github.com/abocchieri/ExoNAMD.git
     cd ExoNAMD
     pip install -e .
+
+Using poetry:
+
+.. code-block:: bash
+
+    pip install poetry
+    poetry install
+
+Optional dependencies can be installed with the following command:
+
+.. code-block:: bash
+
+    poetry install --with docs
 
 Verifying Installation
 ----------------------

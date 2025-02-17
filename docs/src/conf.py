@@ -127,7 +127,7 @@ html_context = {
 }
 
 html_static_path = ["_static"]
-html_logo = "_static/exonamd_logo.svg"
+# html_logo = "_static/exonamd_logo.svg"
 
 html_show_sourcelink = False
 
@@ -209,7 +209,7 @@ latex_elements = {
     "tableofcontents": " ",
 }
 
-latex_logo = "_static/exonamd_logo.png"
+# latex_logo = "_static/exonamd_logo.png"
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
