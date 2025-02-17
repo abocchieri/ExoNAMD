@@ -39,6 +39,8 @@ The database will be populated with the following columns:
 - `pl_ratdor`: Ratio of the semi-major axis to the stellar radius
 - `pl_ratror`: Ratio of the planet radius to the stellar radius
 
+For `pl_bmasse`, `pl_rade`, `pl_orbsmax`, `pl_orbeccen`, `pl_orbincl`, and `pl_trueobliq`, the associated error bars are also retrieved.
+
 The `create_db` function also deals with aliases, computes missing values from simple relations, and stores the curated database.
 
 
@@ -80,6 +82,24 @@ Finally, the function stores the database with the NAMD values in a new file.
 
     The relative NAMD is defined in `Turrini et al. (2021) <https://doi.org/10.1051/0004-6361/201936301>`_ and the equation is given also in our paper `Bocchieri et al. (2025) <https://doi.org/TODO>`_, which contains the definition of the absolute NAMD.
 
+4. Plot the results:
+
+.. code-block:: python
+
+    from exonamd.run import plot_sample_namd
+
+    plot_sample_namd(df, title="NAMD vs. Multiplicity")
+
+This function plots the NAMD values for the systems in the database. It produces a scatter plot similar to the one shown in `Turrini et al. (2021) <https://doi.org/10.1051/0004-6361/201936301>`_, their Figure 2.
+
+Monte Carlo Analysis
+^^^^^^^^^^^^^^^^^^^^
+
+Uncertainty estimation is performed using Monte Carlo sampling following the methodology in `Turrini et al. (2021) <https://doi.org/10.1051/0004-6361/201936301>`_:
+
+- We draw from a truncated normal via rejection sampling: for each parameter, we draw 250,000 random samples from a Gaussian distribution centered at the expected value and with an uncertainty obtained from the arithmetic mean of the upper and lower error bars; then, we reject those outside physical bounds;
+- We perform this step on all parameters needed for the relative and absolute NAMD calculations.
+
 Command Line Interface
 ----------------------
 
@@ -87,10 +107,10 @@ ExoNAMD can also be run from the command line:
 
 .. code-block:: bash
 
-    # Update database and run calculations
+    # Update existing database and run calculations
     exonamd -u
 
-    # Run with existing database
+    # Create database from scratch and run calculations
     exonamd
 
     # Enable debug mode
@@ -99,22 +119,4 @@ ExoNAMD can also be run from the command line:
     # Enable logging to file
     exonamd -l
 
-Core Functions
---------------
-
-NAMD Calculation
-^^^^^^^^^^^^^^^^
-
-The package calculates both relative and absolute NAMD:
-
-- Relative NAMD: Uses relative inclination with respect to the most massive planet
-- Absolute NAMD: Uses true obliquity values
-
-Monte Carlo Analysis
-^^^^^^^^^^^^^^^^^^^^
-
-Uncertainty estimation is performed using Monte Carlo sampling:
-
-.. code-block:: python
-
-    df = calc_namd(df, core=True)  # Includes Monte Carlo analysis
+These options are shown when running ``exonamd -h``, i.e. the help command.

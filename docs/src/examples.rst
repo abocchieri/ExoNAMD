@@ -1,6 +1,8 @@
 Examples and Tutorials
 ======================
 
+Full tutorials can be found in the `notebook` directory of the repository. Below are some basic examples to get you started.
+
 Basic Examples
 --------------
 

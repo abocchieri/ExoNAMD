@@ -25,6 +25,6 @@ Features
 
 * Automated data retrieval from NASA Exoplanet Archive
 * NAMD calculations for planetary systems
-* Support for both relative and absolute inclinations
+* Support for both relative and absolute NAMD
 * Monte Carlo uncertainty estimation
 * Visualization tools for NAMD analysis
