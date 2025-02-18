@@ -11,6 +11,7 @@ Contents
 
    installation
    usage
+   developer
    api
    examples
    

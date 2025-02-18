@@ -1,6 +1,7 @@
 import sys
 
 from exonamd import logger
+from exonamd.log import addLogFile, setLogLevel
 
 from exonamd import __pkg_name__
 from exonamd import __version__
@@ -67,10 +68,10 @@ def main():
 
     if not args.debug:
         logger.remove(0)
-        logger.add(sys.stderr, level="INFO")
+        setLogLevel("INFO")
 
     if args.log:
-        logger.add(f"{__pkg_name__}_{time.strftime('%Y%m%d_%H:%M:%S')}.log")
+        addLogFile(f"{__pkg_name__}_{time.strftime('%Y%m%d_%H:%M:%S')}.log")
         logger.info("Logging to file enabled")
 
     logger.log("Announce", f"Starting {__pkg_name__} v{__version__}")

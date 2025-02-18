@@ -4,6 +4,8 @@ Installation Guide
 Prerequisites
 -------------
 
+These are the dependencies required to run ``ExoNAMD``:
+
 * Python 3.8+
 * numpy
 * pandas
@@ -12,6 +14,15 @@ Prerequisites
 * requests
 * loguru
 * astroquery
+
+These are the dependencies required to build the documentation:
+
+* sphinx
+* sphinxcontrib-napoleon
+* sphinxcontrib-jsmath
+* sphinx-rtd-theme
+
+The installation can be done using ``pip`` or ``poetry``, see below.
 
 Installing ``ExoNAMD``
 ----------------------
