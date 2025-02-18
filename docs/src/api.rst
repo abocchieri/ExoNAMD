@@ -25,6 +25,14 @@ Calculation Tools
    :undoc-members:
    :show-inheritance:
 
+Logging
+-------
+
+.. automodule:: exonamd.log
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Visualization
 -------------
 
