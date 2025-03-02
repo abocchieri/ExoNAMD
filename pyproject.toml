@@ -53,6 +53,7 @@ pandas = "*"
 swifter = "*"
 loguru = "*"
 astroquery = "*"
+siphash24 = "*"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0"
