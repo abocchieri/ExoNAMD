@@ -92,6 +92,27 @@ Finally, the function stores the database with the NAMD values in a new file.
 
 This function plots the NAMD values for the systems in the database. It produces a scatter plot similar to the one shown in `Turrini et al. (2021) <https://doi.org/10.1051/0004-6361/201936301>`_, their Figure 2.
 
+Flags
+^^^^^
+
+Flags are used to keep track of the interpolated values. The flags are stored in the database produced by ``ExoNAMD`` and are used to interpret the results. The flags are as follows:
+
+- [1]: Eccentricity
+- [2]: Mass
+- [3]: Inclination
+- [4]: Semi-major axis
+- [5]: Stellar obliquity
+- [-]: Associated lower errorbar
+- [+]: Associated upper errorbar
+
+"0" is set at the beginning of the process, and the flags are updated as the values are interpolated.
+
+For example, if we interpolated the eccentricity and stellar obliquity, together with their uncertainties, the resulting flag would be [01+-5+-]. 
+
+.. note::
+
+    Missing error bars are interpolated by setting them to zero by default to keep more targets in the sample. As a consequence, the resulting NAMD values from our Monte Carlo procedure provide a lower limit by definition. This artifact is most prominent when the error bars of the eccentricity and stellar obliquity are missing.
+
 Monte Carlo Analysis
 ^^^^^^^^^^^^^^^^^^^^
 
