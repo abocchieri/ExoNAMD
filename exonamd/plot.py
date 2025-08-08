@@ -8,6 +8,19 @@ from loguru import logger
 from exonamd.utils import ROOT
 from exonamd.solve import solve_namd_mc
 
+# set the default fontsizes
+plt.rcParams.update(
+    {
+        "font.size": 14,
+        "axes.titlesize": 18,
+        "axes.labelsize": 14,
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+        "legend.fontsize": 14,
+        "figure.titlesize": 20,
+    }
+)
+
 
 @logger.catch
 def simple_plot(
@@ -82,6 +95,8 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False, outpat
     iq = (q84 - q16) / 2
     sigma_rel = iq / q50
 
+    bad_idx = sigma_rel > 1.0
+
     ylabel = rf"{which.upper()}$_{kind[0].upper()}$"
 
     coeffs = np.polyfit(sy_pnum, q50, 1)
@@ -90,7 +105,7 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False, outpat
         coeffs = np.polyfit(sy_pnum, np.log10(q50), 1)
         line = 10 ** np.polyval(coeffs, np.array(list(set(sy_pnum))))
 
-    plt.figure()
+    plt.figure(figsize=(6, 6))
     plt.plot(
         np.array(list(set(sy_pnum))),
         line,
@@ -118,19 +133,29 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False, outpat
         yerr=[errdown, errup],
         fmt="none",
         c="k",
-        alpha=0.5,
+        alpha=0.8,
         lw=0.5,
         capsize=2,
+        zorder=10,
     )
     s = plt.scatter(
-        sy_pnum,
-        q50,
-        c=sigma_rel,
+        sy_pnum[~bad_idx],
+        q50[~bad_idx],
+        c=sigma_rel[~bad_idx],
         cmap="coolwarm",
-        zorder=9,
+        zorder=0,
     )
     plt.colorbar(s, label="Relative uncertainty")
     plt.clim(0, 1)
+    plt.scatter(
+        sy_pnum[bad_idx],
+        q50[bad_idx],
+        color="w",
+        edgecolors="k",
+        linewidths=0.5,
+        facecolors="none",
+        zorder=0,
+    )
     plt.xlabel("Multiplicity")
     plt.ylabel(ylabel)
     plt.yscale(yscale)
@@ -208,7 +233,9 @@ def plot_host_namd(
     logger.info("Plot done")
 
 
-def plot_sample_namd(df: pd.DataFrame, title: str):
+def plot_sample_namd(
+    df: pd.DataFrame, title: str, kind: str = "rel", outpath: str = None
+):
     """
     Plot the sample NAMD against the multiplicity.
 
@@ -220,6 +247,10 @@ def plot_sample_namd(df: pd.DataFrame, title: str):
         The NAMD database.
     title : str
         The title of the plot.
+    kind : str
+        Which type of NAMD to plot. One of 'rel' (relative NAMD) or 'abs' (absolute NAMD).
+    outpath : str
+        The path to save the plot.
 
     Returns
     -------
@@ -237,10 +268,11 @@ def plot_sample_namd(df: pd.DataFrame, title: str):
         df=df.groupby("hostname").apply(
             lambda g: g.select_dtypes(exclude=["object"]).mean(),
         ),
-        kind="rel",
+        kind=kind,
         title=title,
         which="namd",
         yscale="log",
         xoffs=True,
+        outpath=outpath,
     )
     logger.info("Plot done")
