@@ -168,7 +168,7 @@ def solve_relincl(row, df):
     Returns
     -------
     pandas.Series
-        A pandas Series containing the relative inclination and the associated uncertainties. 
+        A pandas Series containing the relative inclination and the associated uncertainties.
     """
     hostname = get_value(row["hostname"])
     incl = get_value(row["pl_orbincl"])
@@ -212,7 +212,8 @@ def solve_amdk(row, kind: str):
     eccen = get_value(row["pl_orbeccen"])
     di_ = {
         "rel": get_value(row["pl_relincl"]),
-        "abs": get_value(row["pl_trueobliq"]),
+        "abs": get_value(row["pl_trueobliq"])
+        / 2.0,  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1
     }
     di = di_[kind]
     sma = get_value(row["pl_orbsmax"])
