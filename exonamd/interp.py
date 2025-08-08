@@ -60,7 +60,7 @@ def interp_eccentricity(row):
 @logger.catch
 def interp_mass(row, min_radius=0.5, max_radius=6.0):
     """
-    Interpolate missing mass values by using the mass-radius relation implemented in the spright package, which is described in ...
+    Interpolate missing mass values by using the mass-radius relation implemented in the spright package, which is described in https://spright.readthedocs.io/en/latest/.
 
     Parameters
     ----------
@@ -216,7 +216,7 @@ def interpolate_angle(row, df, value_type):
         value = backup_value
         err1 = backup_err1
         err2 = backup_err2
-        flag += f"{flag_suffix}+-"
+        flag += f"{flag_suffix}d+-"
 
     else:
         if max_mass_idx in valuenan.index:
