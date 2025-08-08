@@ -166,10 +166,17 @@ def interp_db(df: pd.DataFrame):
 
     # Task 2: input missing values (if any) by interpolation
     logger.info("Thinning down the data with nanmedian")
+    NaT_idx = df[df["rowupdate"].isna()].index
+    if len(NaT_idx) > 0:
+        logger.warning(f"NaT values in rowupdate: {len(NaT_idx)}")
+        df.loc[NaT_idx, "rowupdate"] = pd.to_datetime("1900-01-01")
+    df["rowupdate"] = pd.to_datetime(df["rowupdate"], format="%Y-%m-%d")
+    latest_update_idx = df.groupby("pl_name")["rowupdate"].idxmax()
+
     cols = df.columns.difference(["hostname", "pl_name", "default_flag", "rowupdate"])
     medians = df.groupby("pl_name")[cols].transform(np.nanmedian)
-    df.loc[df["default_flag"] == 1, cols] = medians.loc[df["default_flag"] == 1]
-    df = df[df["default_flag"] == 1].drop(columns="default_flag")
+    df.loc[latest_update_idx, cols] = medians.loc[latest_update_idx]
+    df = df.loc[latest_update_idx].drop(columns="default_flag")
     logger.info("Data thinned down")
 
     logger.info("Checking for duplicates")
@@ -277,7 +284,16 @@ def interp_db(df: pd.DataFrame):
     return df
 
 
-def calc_namd(df: pd.DataFrame, plot=False, core=True):    
+def calc_namd(
+    df: pd.DataFrame,
+    save=True,
+    plot=False,
+    core=True,
+    filt=None,
+    which=["rel", "abs"],
+    threshold=100,
+    Npt=int(1e6),
+):
     """
     Compute the NAMD for a given sample of planetary systems.
 
@@ -285,10 +301,14 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
     ----------
     df : pd.DataFrame
         The input database. If None, it will be reloaded from the default location.
+    save : bool, optional
+        Whether to save the output database. Default is True.
     plot : bool, optional
         Whether to plot some diagnostic plots. Default is False.
     core : bool, optional
         Whether to select only the "core" sample. Default is True.
+    filt : callable, optional
+        The filter to obtain the "core" sample. Default is None.
 
     Notes
     -----
@@ -303,31 +323,40 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
         logger.info("Database reloaded")
 
     logger.debug("Dropping columns that are no longer needed")
-    df.drop(columns=["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"], inplace=True)
+    df = df.drop(columns=["pl_orbincl", "pl_orbinclerr1", "pl_orbinclerr2"])
     logger.debug("Columns dropped")
 
     # Task 2: compute the NAMD
-    logger.info("Computing the relative NAMD")
-    df = groupby_apply_merge(
-        df,
-        "hostname",
-        solve_namd,
-        kind="rel",
-        allow_overwrite=True,
-    )
-    logger.info("Relative NAMD computed")
+    if not set(which).issubset({"rel", "abs"}):
+        raise ValueError(
+            "Invalid 'which' parameter. Must be a subset of {'rel', 'abs'}."
+        )
 
-    logger.info("Computing the absolute NAMD")
-    df = groupby_apply_merge(
-        df,
-        "hostname",
-        solve_namd,
-        kind="abs",
-        allow_overwrite=True,
-    )
-    logger.info("Absolute NAMD computed")
+    if "rel" in which:
 
-    if plot:
+        logger.info("Computing the relative NAMD")
+        df = groupby_apply_merge(
+            df,
+            "hostname",
+            solve_namd,
+            kind="rel",
+            allow_overwrite=True,
+        )
+        logger.info("Relative NAMD computed")
+
+    if "abs" in which:
+
+        logger.info("Computing the absolute NAMD")
+        df = groupby_apply_merge(
+            df,
+            "hostname",
+            solve_namd,
+            kind="abs",
+            allow_overwrite=True,
+        )
+        logger.info("Absolute NAMD computed")
+
+    if plot and (which == ["rel", "abs"]):
         (
             df.groupby("hostname")[["namd_rel", "namd_abs"]]
             .transform("mean")
@@ -339,6 +368,8 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
                 title="Full sample",
             )
         )
+
+    if plot and (which == ["rel"]):
 
         (
             df.groupby("hostname")[["sy_pnum", "namd_rel"]]
@@ -353,13 +384,31 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
             )
         )
 
-    if core:
+    if plot and (which == ["abs"]):
+
+        (
+            df.groupby("hostname")[["sy_pnum", "namd_abs"]]
+            .mean()
+            .reset_index()
+            .plot(
+                kind="scatter",
+                x="sy_pnum",
+                y="namd_abs",
+                logy=True,
+                title="Full sample",
+            )
+        )
+
+    if core and (filt is None):
         logger.info("Defining the core sample")
-        core_flags = ["0", "05+", "05-", "05+-"]
+        core_flags = ["0", "05+", "05-", "05+-", "05d+-"]
         df = df.groupby("hostname").filter(lambda x: all(x["flag"].isin(core_flags)))
         logger.info("Core sample defined")
+    elif core and (filt is not None):
+        logger.info("Defining the core sample using the custom filter")
+        df = df.groupby("hostname").filter(filt)
 
-    if plot:
+    if plot and (which == ["rel"]) and core:
         (
             df.groupby("hostname")[["sy_pnum", "namd_rel"]]
             .transform("mean")
@@ -372,35 +421,47 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
             )
         )
 
+    if plot and (which == ["abs"]) and core:
+        (
+            df.groupby("hostname")[["sy_pnum", "namd_abs"]]
+            .transform("mean")
+            .plot(
+                kind="scatter",
+                x="sy_pnum",
+                y="namd_abs",
+                logy=True,
+                title="Core sample",
+            )
+        )
+
     # Task 3: compute the NAMD and associated confidence intervals
-    Npt = 250000
-    threshold = 1000
+    if "rel" in which:
+        logger.info("Computing the Monte Carlo relative NAMD")
+        df = groupby_apply_merge(
+            df,
+            "hostname",
+            solve_namd_mc,
+            kind="rel",
+            Npt=Npt,
+            threshold=threshold,
+            allow_overwrite=True,
+        )
+        logger.info("Relative NAMD computed")
 
-    logger.info("Computing the Monte Carlo relative NAMD")
-    df = groupby_apply_merge(
-        df,
-        "hostname",
-        solve_namd_mc,
-        kind="rel",
-        Npt=Npt,
-        threshold=threshold,
-        allow_overwrite=True,
-    )
-    logger.info("Relative NAMD computed")
+    if "abs" in which:
+        logger.info("Computing the Monte Carlo absolute NAMD")
+        df = groupby_apply_merge(
+            df,
+            "hostname",
+            solve_namd_mc,
+            kind="abs",
+            Npt=Npt,
+            threshold=threshold,
+            allow_overwrite=True,
+        )
+        logger.info("Absolute NAMD computed")
 
-    logger.info("Computing the Monte Carlo absolute NAMD")
-    df = groupby_apply_merge(
-        df,
-        "hostname",
-        solve_namd_mc,
-        kind="abs",
-        Npt=Npt,
-        threshold=threshold,
-        allow_overwrite=True,
-    )
-    logger.info("Absolute NAMD computed")
-
-    if plot:
+    if plot and (which == ["rel", "abs"]):
         (
             df.groupby("hostname")[["namd_rel_q50", "namd_abs_q50"]]
             .transform("mean")
@@ -408,10 +469,11 @@ def calc_namd(df: pd.DataFrame, plot=False, core=True):
         )
 
     # Task 4: store the namd database
-    logger.info("Storing the NAMD database")
-    out_path = os.path.join(ROOT, "data", "exo_namd.csv")
-    df.to_csv(out_path, index=False)
-    logger.info(f"Database stored at {out_path}")
+    if save:
+        logger.info("Storing the NAMD database")
+        out_path = os.path.join(ROOT, "data", "exo_namd.csv")
+        df.to_csv(out_path, index=False)
+        logger.info(f"Database stored at {out_path}")
 
     return df
 
