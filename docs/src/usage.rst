@@ -104,6 +104,7 @@ Flags are used to keep track of the interpolated values. The flags are stored in
 - [5]: Stellar obliquity
 - [-]: Associated lower errorbar
 - [+]: Associated upper errorbar
+- [d]: Do not use
 
 "0" is set at the beginning of the process, and the flags are updated as the values are interpolated.
 
@@ -112,6 +113,10 @@ For example, if we interpolated the eccentricity and stellar obliquity, together
 .. note::
 
     Missing error bars are interpolated by setting them to zero by default to keep more targets in the sample. As a consequence, the resulting NAMD values from our Monte Carlo procedure provide a lower limit by definition. This artifact is most prominent when the error bars of the eccentricity and stellar obliquity are missing.
+
+.. warning::
+
+    If "d" is present in the flag, the parameter is absent for all planets in the system and we mark it as a "do not use" system.
 
 Monte Carlo Analysis
 ^^^^^^^^^^^^^^^^^^^^
