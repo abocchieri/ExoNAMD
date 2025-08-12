@@ -43,4 +43,5 @@ def compute_namd(amdk, m, sqrt_a):
     namd : float
         Normalized angular momentum deficit.
     """
+
     return np.sum(amdk) / np.sum(m * sqrt_a)
