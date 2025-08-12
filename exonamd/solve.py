@@ -292,7 +292,8 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
         "rel": get_value(row["pl_relincl"]),
         "relerr1": get_value(row["pl_relinclerr1"]),
         "relerr2": get_value(row["pl_relinclerr2"]),
-        "abs": get_value(row["pl_trueobliq"]),
+        "abs": get_value(row["pl_trueobliq"])
+        / 2.0,  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1,
         "abserr1": get_value(row["pl_trueobliqerr1"]),
         "abserr2": get_value(row["pl_trueobliqerr2"]),
     }
