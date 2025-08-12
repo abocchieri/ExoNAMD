@@ -75,11 +75,28 @@ def simple_plot(
 
 
 @logger.catch
-def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False, outpath=None):
+def pop_plot(
+    df,
+    kind,
+    title="",
+    which="namd",
+    yscale="log",
+    xoffs=0.3,
+    outpath=None,
+    replace_nan=False,
+):
     # Plot the values vs multiplicity and color by their relative uncertainty
 
     df = df.sort_values(by="sy_pnum")
     sy_pnum = df["sy_pnum"]
+    nanidx = df[f"{which}_{kind}_q50"].isnull()
+    replaced_idx = nanidx.copy()
+
+    if replace_nan:
+        df.loc[nanidx, f"{which}_{kind}_q50"] = df.loc[nanidx, f"{which}_{kind}"]
+        df.loc[nanidx, f"{which}_{kind}_q16"] = df.loc[nanidx, f"{which}_{kind}"]
+        df.loc[nanidx, f"{which}_{kind}_q84"] = df.loc[nanidx, f"{which}_{kind}"]
+
     q50 = df[f"{which}_{kind}_q50"]
     q16 = df[f"{which}_{kind}_q16"]
     q84 = df[f"{which}_{kind}_q84"]
@@ -115,22 +132,22 @@ def pop_plot(df, kind, title="", which="namd", yscale="log", xoffs=False, outpat
         zorder=10,
     )
 
-    if xoffs:
+    if xoffs > 0.0:
         M = set(sy_pnum)
         n_list = []
         for m in M:
             idx = sy_pnum == m
             n_list.append(idx.sum())
         n_list = np.array(n_list)
-        xoffs = 0.3 * n_list / n_list.max()
+        xoffs = xoffs * n_list / n_list.max()
         for i, m in enumerate(M):
             idx = sy_pnum == m
             sy_pnum[idx] += np.linspace(-xoffs[i], xoffs[i], idx.sum())
 
     plt.errorbar(
-        sy_pnum,
-        q50,
-        yerr=[errdown, errup],
+        sy_pnum[~replaced_idx],
+        q50[~replaced_idx],
+        yerr=[errdown[~replaced_idx], errup[~replaced_idx]],
         fmt="none",
         c="k",
         alpha=0.8,
@@ -272,7 +289,6 @@ def plot_sample_namd(
         title=title,
         which="namd",
         yscale="log",
-        xoffs=True,
         outpath=outpath,
     )
     logger.info("Plot done")
