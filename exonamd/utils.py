@@ -462,3 +462,69 @@ def check_name(names):
 
 def get_value(value):
     return value.iloc[0] if isinstance(value, pd.Series) else value
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import truncnorm, norm
+
+
+def sample_trunc_normal(
+    mu=0.0, sigma=1.0, lower=-1.0, upper=2.0, n=10000, random_state=None
+):
+    """
+    Sample from a truncated normal distribution using scipy.stats.truncnorm.
+
+    Parameters
+    ----------
+    mu, sigma : float
+        Mean and standard deviation of the underlying normal.
+    lower, upper : float
+        Truncation bounds (inclusive).
+    n : int
+        Number of samples to draw.
+    random_state : int | None
+        Seed for reproducibility.
+
+    Example
+    -------
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> from scipy.stats import truncnorm, norm
+
+    >>> mu = 1.0
+    >>> sigma = 0.8
+    >>> lower = 0.0
+    >>> upper = 2.0
+    >>> n = 10000
+    >>> seed = 42
+
+    >>> samples = sample_trunc_normal(mu=mu, sigma=sigma, lower=lower, upper=upper, n=n, random_state=seed)
+
+    >>> # Plot histogram and theoretical PDF
+    >>> fig, ax = plt.subplots(figsize=(8, 4.5))
+    >>> ax.hist(samples, bins=60, density=True, alpha=0.6)
+    >>> ax.set_xlabel("x")
+    >>> ax.set_ylabel("Density")
+    >>> ax.set_title(f"Truncated Normal: mu={mu}, sigma={sigma}, lower={lower}, upper={upper}")
+
+    >>> # Theoretical PDF
+    >>> Z = norm.cdf((upper - mu) / sigma) - norm.cdf((lower - mu) / sigma)
+    >>> xs = np.linspace(lower, upper, 400)
+    >>> pdf = norm.pdf((xs - mu) / sigma) / (sigma * Z)
+    >>> ax.plot(xs, pdf, linewidth=2)
+
+    >>> plt.show()
+
+    Returns
+    -------
+    samples : ndarray, shape (n,)
+    """
+    if random_state is not None:
+        np.random.seed(random_state)
+
+    # Convert bounds to standard normal units
+    if sigma == 0:
+        sigma = 1e-9
+    a, b = (lower - mu) / sigma, (upper - mu) / sigma
+    return truncnorm.rvs(a, b, loc=mu, scale=sigma, size=n)
