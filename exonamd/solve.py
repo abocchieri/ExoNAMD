@@ -5,6 +5,7 @@ import pandas as pd
 from loguru import logger
 
 from exonamd.utils import get_value
+from exonamd.utils import sample_trunc_normal
 from exonamd.core import compute_amdk
 from exonamd.core import compute_namd
 
@@ -258,7 +259,7 @@ def solve_namd(host, kind: str):
     return pd.Series(out)
 
 
-def solve_amdk_mc(row, kind, Npt, threshold):
+def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
     """
     Compute the absolute or relative angular momentum deficit (AMD) for a given planet using a Monte Carlo approach.
 
@@ -272,6 +273,8 @@ def solve_amdk_mc(row, kind, Npt, threshold):
         Number of Monte Carlo samples.
     threshold: int
         Minimum number of valid samples required.
+    use_trunc_normal: bool
+        If True, use a truncated normal distribution to sample the parameters. If False, use a normal distribution with rejection sampling.
 
     Returns
     -------
@@ -303,35 +306,50 @@ def solve_amdk_mc(row, kind, Npt, threshold):
     smaerr2 = get_value(row["pl_orbsmaxerr2"])
 
     # Sample the parameters
-    mass_mc = np.random.normal(mass, 0.5 * (masserr1 - masserr2), Npt)
-    eccen_mc = np.random.normal(eccen, 0.5 * (eccenerr1 - eccenerr2), Npt)
-    di_mc = np.random.normal(di, 0.5 * (dierr1 - dierr2), Npt)
-    sma_mc = np.random.normal(sma, 0.5 * (smaerr1 - smaerr2), Npt)
+    if use_trunc_normal:
+        mass_mc = sample_trunc_normal(
+            mu=mass, sigma=0.5 * (masserr1 - masserr2), lower=0.0, upper=np.inf, n=Npt
+        )
+        eccen_mc = sample_trunc_normal(
+            mu=eccen, sigma=0.5 * (eccenerr1 - eccenerr2), lower=0.0, upper=1.0, n=Npt
+        )
+        di_mc = sample_trunc_normal(
+            mu=np.abs(di), sigma=0.5 * (dierr1 - dierr2), lower=0.0, upper=180.0, n=Npt
+        )
+        sma_mc = sample_trunc_normal(
+            mu=sma, sigma=0.5 * (smaerr1 - smaerr2), lower=0.0, upper=np.inf, n=Npt
+        )
 
-    # Mask unphysical values
-    mask = (
-        (mass_mc > 0)
-        & (eccen_mc >= 0)
-        & (eccen_mc < 1)
-        & np.abs(di_mc >= 0)
-        & (di_mc < 180)
-        & (sma_mc > 0)
-    )
+    else:
+        mass_mc = np.random.normal(mass, 0.5 * (masserr1 - masserr2), Npt)
+        eccen_mc = np.random.normal(eccen, 0.5 * (eccenerr1 - eccenerr2), Npt)
+        di_mc = np.random.normal(np.abs(di), 0.5 * (dierr1 - dierr2), Npt)
+        sma_mc = np.random.normal(sma, 0.5 * (smaerr1 - smaerr2), Npt)
 
-    # Check number of valid samples
-    if np.sum(mask) < threshold:
-        out = {
-            f"amdk_{kind}_mc": np.nan,
-            "mass_mc": np.nan,
-            "sqrt_sma_mc": np.nan,
-        }
+        # Mask unphysical values
+        mask = (
+            (mass_mc > 0)
+            & (eccen_mc >= 0)
+            & (eccen_mc < 1)
+            & (di_mc > 0)
+            & (di_mc < 180)
+            & (sma_mc > 0)
+        )
 
-        return pd.Series(out)
+        # Check number of valid samples
+        if np.sum(mask) < threshold:
+            out = {
+                f"amdk_{kind}_mc": np.nan,
+                "mass_mc": np.nan,
+                "sqrt_sma_mc": np.nan,
+            }
 
-    mass_mc = np.ma.MaskedArray(mass_mc, mask=~mask)
-    eccen_mc = np.ma.MaskedArray(eccen_mc, mask=~mask)
-    di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
-    sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
+            return pd.Series(out)
+
+        mass_mc = np.ma.MaskedArray(mass_mc, mask=~mask)
+        eccen_mc = np.ma.MaskedArray(eccen_mc, mask=~mask)
+        di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
+        sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
 
     # Compute the amdk
     amdk = compute_amdk(mass_mc, eccen_mc, di_mc, sma_mc)
@@ -346,7 +364,7 @@ def solve_amdk_mc(row, kind, Npt, threshold):
 
 
 @logger.catch
-def solve_namd_mc(host, kind, Npt, threshold, full=False):
+def solve_namd_mc(host, kind, Npt, threshold, use_trunc_normal, full=False):
     """
     Wrapper of the functions **solve_amdk_mc** and **compute_namd** to compute the normalized angular momentum deficit (NAMD) for a given system using a Monte Carlo approach.
 
@@ -360,6 +378,8 @@ def solve_namd_mc(host, kind, Npt, threshold, full=False):
         Number of Monte Carlo samples.
     threshold: int
         Minimum number of valid samples required.
+    use_trunc_normal: bool
+        If True, use a truncated normal distribution to sample the parameters. If False, use a normal distribution with rejection sampling.
     full: bool
         If True, return the full array of NAMD values. Otherwise, return only the 16th, 50th and 84th percentiles.
 
@@ -368,14 +388,17 @@ def solve_namd_mc(host, kind, Npt, threshold, full=False):
     pandas.Series
         A pandas Series containing the normalized angular momentum deficit results.
     """
-    retval = host.apply(solve_amdk_mc, args=(kind, Npt, threshold), axis=1)
+    retval = host.apply(
+        solve_amdk_mc, args=(kind, Npt, threshold, use_trunc_normal), axis=1
+    )
 
     amdk = retval[f"amdk_{kind}_mc"]
     mass = retval["mass_mc"]
     sqrt_sma = retval["sqrt_sma_mc"]
 
     namd = compute_namd(amdk, mass, sqrt_sma)
-    namd = namd.compressed()
+    if isinstance(namd, np.ma.MaskedArray):
+        namd = namd.compressed()
 
     if len(namd) < threshold:
         out = {
