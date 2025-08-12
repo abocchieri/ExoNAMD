@@ -126,7 +126,7 @@ def create_db(from_scratch=True):
     return df
 
 
-def interp_db(df: pd.DataFrame):
+def interp_db(df: pd.DataFrame, out_path=""):
     """
     Curates and interpolates missing values in the NASA exoplanet database.
 
@@ -143,6 +143,8 @@ def interp_db(df: pd.DataFrame):
     ----------
     df : pd.DataFrame
         The database to be curated and interpolated. If None, the function will reload the database.
+    out_path : str, optional
+        The path where the curated+interpolated database will be stored. If empty, the default path will be used.
 
     Returns
     -------
@@ -277,7 +279,9 @@ def interp_db(df: pd.DataFrame):
 
     # Task 4: store the curated+interpolated database
     logger.info("Storing the curated+interpolated database")
-    out_path = os.path.join(ROOT, "data", "exo_interp.csv")
+
+    if out_path == "":
+        out_path = os.path.join(ROOT, "data", "exo_interp.csv")
     df.to_csv(out_path, index=False)
     logger.info(f"Database stored at {out_path}")
 
@@ -292,7 +296,9 @@ def calc_namd(
     filt=None,
     which=["rel", "abs"],
     threshold=100,
-    Npt=int(1e6),
+    use_trunc_normal=True,
+    Npt=10000,
+    out_path="",
 ):
     """
     Compute the NAMD for a given sample of planetary systems.
@@ -333,7 +339,6 @@ def calc_namd(
         )
 
     if "rel" in which:
-
         logger.info("Computing the relative NAMD")
         df = groupby_apply_merge(
             df,
@@ -345,7 +350,6 @@ def calc_namd(
         logger.info("Relative NAMD computed")
 
     if "abs" in which:
-
         logger.info("Computing the absolute NAMD")
         df = groupby_apply_merge(
             df,
@@ -369,8 +373,7 @@ def calc_namd(
             )
         )
 
-    if plot and (which == ["rel"]):
-
+    if plot and ("rel" in which):
         (
             df.groupby("hostname")[["sy_pnum", "namd_rel"]]
             .mean()
@@ -384,8 +387,7 @@ def calc_namd(
             )
         )
 
-    if plot and (which == ["abs"]):
-
+    if plot and ("abs" in which):
         (
             df.groupby("hostname")[["sy_pnum", "namd_abs"]]
             .mean()
@@ -408,7 +410,7 @@ def calc_namd(
         logger.info("Defining the core sample using the custom filter")
         df = df.groupby("hostname").filter(filt)
 
-    if plot and (which == ["rel"]) and core:
+    if plot and ("rel" in which) and core:
         (
             df.groupby("hostname")[["sy_pnum", "namd_rel"]]
             .transform("mean")
@@ -421,7 +423,7 @@ def calc_namd(
             )
         )
 
-    if plot and (which == ["abs"]) and core:
+    if plot and ("abs" in which) and core:
         (
             df.groupby("hostname")[["sy_pnum", "namd_abs"]]
             .transform("mean")
@@ -444,6 +446,7 @@ def calc_namd(
             kind="rel",
             Npt=Npt,
             threshold=threshold,
+            use_trunc_normal=use_trunc_normal,
             allow_overwrite=True,
         )
         logger.info("Relative NAMD computed")
@@ -457,6 +460,7 @@ def calc_namd(
             kind="abs",
             Npt=Npt,
             threshold=threshold,
+            use_trunc_normal=use_trunc_normal,
             allow_overwrite=True,
         )
         logger.info("Absolute NAMD computed")
@@ -471,7 +475,8 @@ def calc_namd(
     # Task 4: store the namd database
     if save:
         logger.info("Storing the NAMD database")
-        out_path = os.path.join(ROOT, "data", "exo_namd.csv")
+        if out_path == "":
+            out_path = os.path.join(ROOT, "data", "exo_namd.csv")
         df.to_csv(out_path, index=False)
         logger.info(f"Database stored at {out_path}")
 
