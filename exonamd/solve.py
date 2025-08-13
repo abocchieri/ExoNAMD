@@ -289,11 +289,10 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
     eccenerr2 = get_value(row["pl_orbeccenerr2"])
 
     di_ = {
-        "rel": get_value(row["pl_relincl"]),
+        "rel": np.abs(get_value(row["pl_relincl"])),  # sign is not important as this is the argument of the cosine
         "relerr1": get_value(row["pl_relinclerr1"]),
         "relerr2": get_value(row["pl_relinclerr2"]),
-        "abs": get_value(row["pl_trueobliq"])
-        / 2.0,  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1,
+        "abs": get_value(row["pl_trueobliq"]),
         "abserr1": get_value(row["pl_trueobliqerr1"]),
         "abserr2": get_value(row["pl_trueobliqerr2"]),
     }
@@ -301,6 +300,7 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
     di = di_[kind]
     dierr1 = di_[f"{kind}err1"]
     dierr2 = di_[f"{kind}err2"]
+    di_upper = 180.0 if kind == "abs" else 90.0
 
     sma = get_value(row["pl_orbsmax"])
     smaerr1 = get_value(row["pl_orbsmaxerr1"])
@@ -309,22 +309,38 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
     # Sample the parameters
     if use_trunc_normal:
         mass_mc = sample_trunc_normal(
-            mu=mass, sigma=0.5 * (masserr1 - masserr2), lower=0.0, upper=np.inf, n=Npt
+            mu=mass,
+            sigma=0.5 * (masserr1 - masserr2),
+            lower=0.0,
+            upper=np.inf,
+            n=Npt,
         )
         eccen_mc = sample_trunc_normal(
-            mu=eccen, sigma=0.5 * (eccenerr1 - eccenerr2), lower=0.0, upper=1.0, n=Npt
+            mu=eccen,
+            sigma=0.5 * (eccenerr1 - eccenerr2),
+            lower=0.0,
+            upper=1.0,
+            n=Npt,
         )
         di_mc = sample_trunc_normal(
-            mu=np.abs(di), sigma=0.5 * (dierr1 - dierr2), lower=0.0, upper=180.0, n=Npt
+            mu=di,
+            sigma=0.5 * (dierr1 - dierr2),
+            lower=0.0,
+            upper=di_upper,
+            n=Npt,
         )
         sma_mc = sample_trunc_normal(
-            mu=sma, sigma=0.5 * (smaerr1 - smaerr2), lower=0.0, upper=np.inf, n=Npt
+            mu=sma,
+            sigma=0.5 * (smaerr1 - smaerr2),
+            lower=0.0,
+            upper=np.inf,
+            n=Npt,
         )
 
     else:
         mass_mc = np.random.normal(mass, 0.5 * (masserr1 - masserr2), Npt)
         eccen_mc = np.random.normal(eccen, 0.5 * (eccenerr1 - eccenerr2), Npt)
-        di_mc = np.random.normal(np.abs(di), 0.5 * (dierr1 - dierr2), Npt)
+        di_mc = np.random.normal(di, 0.5 * (dierr1 - dierr2), Npt)
         sma_mc = np.random.normal(sma, 0.5 * (smaerr1 - smaerr2), Npt)
 
         # Mask unphysical values
@@ -332,8 +348,8 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
             (mass_mc > 0)
             & (eccen_mc >= 0)
             & (eccen_mc < 1)
-            & (di_mc > 0)
-            & (di_mc < 180)
+            & (di_mc >= 0.0)
+            & (di_mc < di_upper)
             & (sma_mc > 0)
         )
 
@@ -351,6 +367,9 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
         eccen_mc = np.ma.MaskedArray(eccen_mc, mask=~mask)
         di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
         sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
+
+    if kind == "abs":
+        di_mc /= 2.0  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1
 
     # Compute the amdk
     amdk = compute_amdk(mass_mc, eccen_mc, di_mc, sma_mc)
