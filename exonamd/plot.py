@@ -29,16 +29,19 @@ def simple_plot(
     title="",
     which="namd",
     ylabel="Frequency",
+    xlabel=None,
     scale="linear",
     bins=50,
     outpath=None,
+    figsize=None,
 ):
     samples = df[f"{which}_{kind}_mc"]
     q50 = df[f"{which}_{kind}_q50"]
     q16 = df[f"{which}_{kind}_q16"]
     q84 = df[f"{which}_{kind}_q84"]
 
-    xlabel = rf"{which.upper()}$_{kind[0].upper()}$"
+    if xlabel is None:
+        xlabel = rf"{which.upper()}$_{kind[0].upper()}$"
 
     if scale == "log":
         samples = np.log10(samples)
@@ -49,7 +52,7 @@ def simple_plot(
     errdown = q50 - q16
     title = f"{title}: " + rf"${q50:.2f}^{{+{errup:.2f}}}_{{-{errdown:.2f}}}$"
 
-    plt.figure()
+    plt.figure(figsize=figsize)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
