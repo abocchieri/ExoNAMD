@@ -50,7 +50,7 @@ Then use `pip` as
 #### Test your installation
 
 Try importing ``ExoNAMD`` as
-exonamd
+
     python -c "import exonamd; print(exonamd.__version__)"
 
 Or running ``ExoNAMD`` itself with the `help` flag as
