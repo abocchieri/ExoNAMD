@@ -46,7 +46,7 @@ __all__ = [
 ]
 
 
-def create_db(from_scratch=True):
+def create_db(from_scratch=True, out_path=""):
     """
     Downloads the NASA Exoplanet Archive confirmed planets table, deals with aliases, computes missing values from simple relations, and stores the curated database.
 
@@ -54,6 +54,8 @@ def create_db(from_scratch=True):
     ----------
     from_scratch : bool, optional
         If True, downloads the entire table. If False, downloads only the rows newer than the latest update date in the current table. Defaults to True.
+    out_path : str, optional
+        The path where the curated database will be stored. If empty, the default path will be used.
 
     Returns
     -------
@@ -119,7 +121,8 @@ def create_db(from_scratch=True):
         df = df.drop_duplicates(keep="last")
         df.reset_index(drop=True)
 
-    out_path = os.path.join(ROOT, "data", "exo.csv")
+    if out_path == "":
+        out_path = os.path.join(ROOT, "data", "exo.csv")
     df.to_csv(out_path, index=False)
     logger.info(f"Database stored at {out_path}")
 
@@ -320,7 +323,7 @@ def calc_namd(
     -----
     The output database will have the same columns as the input database, with the addition of the NAMD parameters.
 
-    The "core" sample is defined as the systems with all planets having a flag of either 0, 05+, 05-, or 05+-, i.e. nothing or only the obliquity has been interpolated.
+    The "core" sample is defined by default as the systems with all planets having a flag of either 0, 05+, 05-, or 05+-, i.e. nothing or only the obliquity has been interpolated. Nonetheless, a custom filter can be provided via the `filt` parameter.
     """
     # Task 1: reload database
     if df is None:

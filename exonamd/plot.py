@@ -32,7 +32,7 @@ def simple_plot(
     xlabel=None,
     scale="linear",
     bins=50,
-    outpath=None,
+    out_path=None,
     figsize=None,
 ):
     samples = df[f"{which}_{kind}_mc"]
@@ -70,9 +70,9 @@ def simple_plot(
         color=["red", "black", "red"],
         linestyles="dashed",
     )
-    if outpath:
-        Path(outpath).parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(outpath, bbox_inches="tight", dpi=300, format="pdf")
+    if out_path:
+        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(out_path, bbox_inches="tight", dpi=300, format="pdf")
 
     plt.show()
 
@@ -85,7 +85,7 @@ def pop_plot(
     which="namd",
     yscale="log",
     xoffs=0.3,
-    outpath=None,
+    out_path=None,
     replace_nan=False,
 ):
     # Plot the values vs multiplicity and color by their relative uncertainty
@@ -184,9 +184,9 @@ def pop_plot(
     plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
     plt.grid(which="both", linestyle="--", alpha=0.5)
 
-    if outpath:
-        Path(outpath).parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(outpath, bbox_inches="tight", dpi=300, format="pdf")
+    if out_path:
+        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(out_path, bbox_inches="tight", dpi=300, format="pdf")
 
     plt.show()
 
@@ -197,7 +197,7 @@ def plot_host_namd(
     kind: str,
     Npt: int = 100000,
     threshold: int = 1000,
-    outpath: str = None,
+    out_path: str = None,
 ):
     """
     Plot the NAMD for a given host.
@@ -236,6 +236,7 @@ def plot_host_namd(
         kind=f"{kind}",
         Npt=Npt,
         threshold=threshold,
+        use_trunc_normal=True,
         full=True,
     )
     logger.info("Values computed")
@@ -248,13 +249,13 @@ def plot_host_namd(
         title=hostname,
         which="namd",
         scale="log",
-        outpath=outpath,
+        out_path=out_path,
     )
     logger.info("Plot done")
 
 
 def plot_sample_namd(
-    df: pd.DataFrame, title: str, kind: str = "rel", outpath: str = None
+    df: pd.DataFrame, title: str, kind: str = "rel", out_path: str = None
 ):
     """
     Plot the sample NAMD against the multiplicity.
@@ -269,7 +270,7 @@ def plot_sample_namd(
         The title of the plot.
     kind : str
         Which type of NAMD to plot. One of 'rel' (relative NAMD) or 'abs' (absolute NAMD).
-    outpath : str
+    out_path : str
         The path to save the plot.
 
     Returns
@@ -292,6 +293,6 @@ def plot_sample_namd(
         title=title,
         which="namd",
         yscale="log",
-        outpath=outpath,
+        out_path=out_path,
     )
     logger.info("Plot done")
