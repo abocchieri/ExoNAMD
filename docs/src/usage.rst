@@ -50,6 +50,10 @@ For `pl_bmasse`, `pl_rade`, `pl_orbsmax`, `pl_orbeccen`, `pl_orbincl`, and `pl_t
 
     When providing custom databases, make sure that the lower error bars are provided as negative values (this follows the NASA Exoplanet Archive convention). Otherwise, the code **will** break later on.
 
+.. note::
+
+    Throughout this documentation, we use the terms true obliquity or stellar obliquity to indicate the spin-orbit angle. As we comment in the paper, there is a subtle distinction between stellar obliquity and spin-orbit angle for multi-planet systems.
+
 The `create_db` function also deals with aliases (inspired from the `gen_tso code <https://pcubillos.github.io/gen_tso/>`_).
 
 The function then stores the curated database in a new file.
@@ -165,7 +169,7 @@ Uncertainty estimation is performed using Monte Carlo sampling following the met
 
 .. note::
 
-    It is possible to use sampling from a normal distribution with rejection for samples outside of physical bounds, by setting the parameter `use_trunc_normal` to False in the function ``calc_namd``. However, this is not recommended as the remaining number of samples after rejection may be too low. In any case, this approach yields the same results as the sampling from a truncated normal in the limit of large sample size.
+    It is possible to use sampling from a normal distribution with rejection for samples outside of physical bounds, by setting the parameter `use_trunc_normal` to False in the function :func:`exonamd.run.calc_namd`. However, this is not recommended as the remaining number of samples after rejection may be too low. In any case, this approach yields the same results as the sampling from a truncated normal in the limit of large sample size.
 
 Command Line Interface
 ----------------------

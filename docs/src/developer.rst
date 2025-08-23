@@ -20,10 +20,26 @@ This web page is written using the reStructuredText_ format, which is parsed by 
 If you want to contribute to this documentation, please refer to sphinx_ documentation first.
 You can improve this pages by digging into the `docs` directory in the source.
 
+You can compile this documentation using the following commands. First, move in the `docs` directory, then:
+
+.. code-block:: bash
+
+  make html
+
+to compile the html version, or 
+
+.. code-block:: bash
+
+  make latexpdf
+
+to compile the pdf version.
+
+The outputs will be generated under `docs/build/html` or `docs/build/latex`, respectively.
+
 
 Testing
 -----------------------
-Unit-testing is very important to make sure that each code addition is tested and validated and the code never breaks. This shall be provided after `ExoNAMD v1.0.0`.
+Unit-testing is very important to make sure that each code addition is tested and validated and the code never breaks. This shall be provided after `ExoNAMD v0.3.0`.
 
 
 .. _logging:
@@ -52,7 +68,7 @@ The user can also set the level of the printed messaged using :func:`exonamd.log
 
 Versioning conventions
 -----------------------
-The versioning convention used (after `ExoNAMD v1.0.0`) shall be the one described in Semantic Versioning (semver_) and shall be compliant to PEP440_ standard.
+The versioning convention used (after `ExoNAMD v0.3.0`) shall be the one described in Semantic Versioning (semver_) and shall be compliant to PEP440_ standard.
 In the X.Y.Z scheme, for each modification to the previous release we increase one of the numbers.
 
 + `X`
