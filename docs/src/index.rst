@@ -10,7 +10,7 @@ Getting Started
 ^^^^^^^^^^^^^^^
 
 ``ExoNAMD`` helps analyze the dynamical state of planetary systems through NAMD calculations.
-To get started, check out the :doc:`installation` guide and the :doc:`usage` documentation.
+To get started, check out the :doc:`installation` and the :doc:`usage`.
 
 Features
 ^^^^^^^^

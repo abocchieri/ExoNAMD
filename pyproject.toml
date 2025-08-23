@@ -46,6 +46,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "*"
+scipy = "*"
 matplotlib = "*"
 spright = "*"
 requests = "*"

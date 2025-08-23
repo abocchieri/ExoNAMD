@@ -8,12 +8,15 @@ These are the dependencies required to run ``ExoNAMD``:
 
 * Python 3.8+
 * numpy
-* pandas
+* scipy
 * matplotlib
-* swifter
+* spright
 * requests
+* pandas
+* swifter
 * loguru
 * astroquery
+* siphash24
 
 These are the dependencies required to build the documentation:
 
@@ -65,7 +68,7 @@ To test for correct setup you can do
 
 .. code-block:: console
 
-    python -c "import exonamd"
+    python -c "import exonamd; print(exonamd.__version__)"
 
 If no errors appeared then it was successfully installed.
 
@@ -73,14 +76,13 @@ Additionally the ``ExoNAMD`` program should now be available in the command line
 
 .. code-block:: console
 
-    exonamd
+    exonamd -h
 
 
 Uninstall ``ExoNAMD``
 ---------------------
 
-``ExoNAMD`` is installed in your system as a standard python package:
-you can uninstall it from your Environment as
+``ExoNAMD`` is installed in your system as a standard python package: you can uninstall it from your environment as
 
 .. code-block:: console
 
@@ -119,7 +121,7 @@ or simply
 Modify ``ExoNAMD``
 ------------------
 
-You can modify ``ExoNAMD`` main code, editing as you prefer, but in order to make the changes effective
+You can modify the ``ExoNAMD`` main code, editing as you prefer, but in order to make the changes effective
 
 .. code-block:: console
 
