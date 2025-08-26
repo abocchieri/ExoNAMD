@@ -1,6 +1,6 @@
 # ``ExoNAMD``
 
-[![PyPI version](https://badge.fury.io/py/exonamd.svg?icon=si%3Apython)](https://badge.fury.io/py/exonamd)
+[![PyPI version](https://badge.fury.io/py/exonamd.svg)](https://badge.fury.io/py/exonamd)
 [![GitHub version](https://badge.fury.io/gh/abocchieri%2Fexonamd.svg)](https://badge.fury.io/gh/abocchieri%2Fexonamd)
 [![Downloads](https://static.pepy.tech/badge/exonamd)](https://pepy.tech/project/exonamd)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
