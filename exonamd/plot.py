@@ -50,7 +50,7 @@ def simple_plot(
     if scale == "log":
         samples = np.log10(samples)
         q16, q50, q84 = np.percentile(samples, [16, 50, 84])
-        xlabel = rf"$\log_{{10}}$ {xlabel}"
+        xlabel = rf"log$\,${xlabel}"
 
     errup = q84 - q50
     errdown = q50 - q16
@@ -192,7 +192,7 @@ def pop_plot(
         )
         ax.yaxis.set_minor_formatter(NullFormatter())
 
-        ylabel = rf"log$_{{10}}$ {ylabel}"
+        ylabel = rf"log$\,${ylabel}"
 
     plt.ylabel(ylabel)
 
