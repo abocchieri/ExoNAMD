@@ -2,7 +2,10 @@ import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogLocator, FuncFormatter, NullFormatter
+
 from loguru import logger
 
 from exonamd.utils import ROOT
@@ -12,12 +15,12 @@ from exonamd.solve import solve_namd_mc
 plt.rcParams.update(
     {
         "font.size": 14,
-        "axes.titlesize": 18,
-        "axes.labelsize": 14,
-        "xtick.labelsize": 12,
-        "ytick.labelsize": 12,
+        "axes.titlesize": 20,
+        "axes.labelsize": 16,
+        "xtick.labelsize": 14,
+        "ytick.labelsize": 14,
         "legend.fontsize": 14,
-        "figure.titlesize": 20,
+        "figure.titlesize": 22,
     }
 )
 
@@ -34,6 +37,7 @@ def simple_plot(
     bins=50,
     out_path=None,
     figsize=None,
+    xlim=(None, None),
 ):
     samples = df[f"{which}_{kind}_mc"]
     q50 = df[f"{which}_{kind}_q50"]
@@ -41,7 +45,7 @@ def simple_plot(
     q84 = df[f"{which}_{kind}_q84"]
 
     if xlabel is None:
-        xlabel = rf"{which.upper()}$_{kind[0].upper()}$"
+        xlabel = rf"{kind[0].upper()}-{which.upper()}"
 
     if scale == "log":
         samples = np.log10(samples)
@@ -70,6 +74,7 @@ def simple_plot(
         color=["red", "black", "red"],
         linestyles="dashed",
     )
+    plt.xlim(xlim)
     if out_path:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(out_path, bbox_inches="tight", dpi=300, format="pdf")
@@ -117,7 +122,7 @@ def pop_plot(
 
     bad_idx = sigma_rel > 1.0
 
-    ylabel = rf"{which.upper()}$_{kind[0].upper()}$"
+    ylabel = rf"{kind[0].upper()}-{which.upper()}"
 
     coeffs = np.polyfit(sy_pnum, q50, 1)
     line = np.polyval(coeffs, np.array(list(set(sy_pnum))))
@@ -177,8 +182,20 @@ def pop_plot(
         zorder=0,
     )
     plt.xlabel("Multiplicity")
-    plt.ylabel(ylabel)
     plt.yscale(yscale)
+
+    if yscale == "log":
+        ax = plt.gca()
+        ax.yaxis.set_major_locator(LogLocator(base=10))
+        ax.yaxis.set_major_formatter(
+            FuncFormatter(lambda y, pos: f"{int(np.log10(y))}" if y > 0 else "")
+        )
+        ax.yaxis.set_minor_formatter(NullFormatter())
+
+        ylabel = rf"log$_{{10}}$ {ylabel}"
+
+    plt.ylabel(ylabel)
+
     plt.title(title)
 
     plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
