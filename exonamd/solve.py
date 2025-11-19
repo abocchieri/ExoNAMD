@@ -211,15 +211,14 @@ def solve_amdk(row, kind: str):
     """
     mass = get_value(row["pl_bmasse"])
     eccen = get_value(row["pl_orbeccen"])
-    di_ = {
-        "rel": get_value(row["pl_relincl"]),
-        "abs": get_value(row["pl_trueobliq"])
-        / 2.0,  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1
-    }
+    di_ = {"rel": get_value(row["pl_relincl"]), "abs": get_value(row["pl_trueobliq"])}
     di = di_[kind]
     sma = get_value(row["pl_orbsmax"])
 
     amdk = compute_amdk(mass, eccen, di, sma)
+
+    if kind == "abs":
+        amdk /= 2.0  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1
 
     out = {
         f"amdk_{kind}": amdk,
@@ -289,7 +288,9 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
     eccenerr2 = get_value(row["pl_orbeccenerr2"])
 
     di_ = {
-        "rel": np.abs(get_value(row["pl_relincl"])),  # sign is not important as this is the argument of the cosine
+        "rel": np.abs(
+            get_value(row["pl_relincl"])
+        ),  # sign is not important as this is the argument of the cosine
         "relerr1": get_value(row["pl_relinclerr1"]),
         "relerr2": get_value(row["pl_relinclerr2"]),
         "abs": get_value(row["pl_trueobliq"]),

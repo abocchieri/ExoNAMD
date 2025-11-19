@@ -114,7 +114,7 @@ Finally, the function stores the database with the NAMD values in a new file.
 
 .. note::
 
-    The code divides the obliquity value by 2 to ensure the absolute NAMD is normalized to 1.
+    The code divides the absolute NAMD value by 2 to ensure it is normalized to 1.
 
 4. Plot the results:
 ^^^^^^^^^^^^^^^^^^^^

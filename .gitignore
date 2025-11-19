@@ -167,4 +167,4 @@ cython_debug/
 
 *.pkl
 
-*plots
+*plots*
