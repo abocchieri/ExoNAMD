@@ -369,11 +369,11 @@ def solve_amdk_mc(row, kind, Npt, threshold, use_trunc_normal=True):
         di_mc = np.ma.MaskedArray(di_mc, mask=~mask)
         sma_mc = np.ma.MaskedArray(sma_mc, mask=~mask)
 
-    if kind == "abs":
-        di_mc /= 2.0  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1
-
     # Compute the amdk
     amdk = compute_amdk(mass_mc, eccen_mc, di_mc, sma_mc)
+    
+    if kind == "abs":
+        amdk /= 2.0  # divided by 2 to ensure the normalization of the absolute NAMD is between 0 and 1
 
     out = {
         f"amdk_{kind}_mc": amdk,
