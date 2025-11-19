@@ -5,6 +5,7 @@
 [![Downloads](https://static.pepy.tech/badge/exonamd)](https://pepy.tech/project/exonamd)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Documentation Status](https://readthedocs.org/projects/exonamd/badge/?version=stable)](https://exonamd.readthedocs.io/en/stable/?badge=stable)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/abocchieri/ExoNAMD)
 
 ## Introduction
 
