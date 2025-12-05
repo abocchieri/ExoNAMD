@@ -38,6 +38,7 @@ def simple_plot(
     out_path=None,
     figsize=None,
     xlim=(None, None),
+    grid=True,
 ):
     samples = df[f"{which}_{kind}_mc"]
     q50 = df[f"{which}_{kind}_q50"]
@@ -66,7 +67,8 @@ def simple_plot(
         histtype="step",
         weights=np.ones_like(samples) / len(samples),
     )
-    plt.grid(which="both", linestyle="--", alpha=0.5)
+    if grid:
+        plt.grid(which="both", linestyle="--", alpha=0.5)
     plt.vlines(
         [q16, q50, q84],
         0,
@@ -75,6 +77,7 @@ def simple_plot(
         linestyles="dashed",
     )
     plt.xlim(xlim)
+    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(nbins=4))
     if out_path:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(out_path, bbox_inches="tight", dpi=300, format="pdf")
@@ -92,6 +95,7 @@ def pop_plot(
     xoffs=0.3,
     out_path=None,
     replace_nan=False,
+    grid=True,
 ):
     # Plot the values vs multiplicity and color by their relative uncertainty
 
@@ -199,7 +203,8 @@ def pop_plot(
     plt.title(title)
 
     plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True))
-    plt.grid(which="both", linestyle="--", alpha=0.5)
+    if grid:
+        plt.grid(which="both", linestyle="--", alpha=0.5)
 
     if out_path:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
